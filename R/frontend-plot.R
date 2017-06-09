@@ -246,3 +246,88 @@ plot.bn.kcv.list = function(x, ..., main, xlab, ylab, connect = FALSE) {
 
 }#PLOT.BN.KCV.LIST
 
+# graphical comparison of different network structures.
+graphviz.compare = function(x, ..., layout = "dot", shape = "circle",
+    main = NULL, sub = NULL, diff = "from-first", diff.args = list()) {
+
+  available.diff.methods = c("none", "from-first")
+
+  # check the first network structure.
+  check.bn(x)
+  nodes = names(x$nodes)
+  # collect all the networks in a singe list.
+  netlist = c(list(x), list(...))
+  # check that the networks in the list are valid and agree with each other.
+  check.customlist(netlist, nodes = nodes) 
+  # check the titles and the subtitles for the networks.
+  if (!is.null(main))
+    if (!is.string.vector(main) || (length(main) != length(netlist)))
+      stop("'main' must a vector of character strings, one for each network.")
+  if (!is.null(sub))
+    if (!is.string.vector(sub) || (length(sub) != length(netlist)))
+      stop("'sub' must a vector of character strings, one for each network.")
+  # check the diff method.
+  check.label(diff, choices = available.diff.methods, argname = "diff")
+  # check the diff extra arguments.
+  if (diff == "none") {
+
+    # nothing to do.
+    check.unused.args(diff.args, character(0))
+
+  }#THEN
+  else if (diff == "from-first") {
+
+    args = c("tp.col", "tp.lty", "tp.lwd", "fp.col", "fp.lty", "fp.lwd",
+             "fn.col", "fn.lty", "fn.lwd")
+
+    # check unused extra arguments.
+    check.unused.args(diff.args, args)
+
+    # check the line type of the different classes of arcs.
+    if ("tp.lty" %in% names(diff.args))
+      check.lty(diff.args$tp.lty)
+    else
+      diff.args$tp.lty = "solid"
+    if ("fp.lty" %in% names(diff.args))
+      check.lty(diff.args$fp.lty)
+    else
+      diff.args$fp.lty = "solid"
+    if ("fn.lty" %in% names(diff.args))
+      check.lty(diff.args$fn.lty)
+    else
+      diff.args$fn.lty = "dashed"
+
+    # check the colour of the different classes of arcs.
+    if ("tp.col" %in% names(diff.args))
+      check.colour(diff.args$tp.col)
+    else
+      diff.args$tp.col = "black"
+
+    if ("fp.col" %in% names(diff.args))
+      check.colour(diff.args$fp.col)
+    else
+      diff.args$fp.col = "red"
+
+    if ("fn.col" %in% names(diff.args))
+      check.colour(diff.args$fn.col)
+    else
+      diff.args$fn.col = "blue"
+
+    # check the line width of the different classes of arcs.
+    for (lwd in c("tp.lwd", "fp.lwd", "fn.lwd"))
+      if (lwd %in% names(diff.args))
+        if (!is.positive(diff.args[[lwd]]))
+          stop("diff.args$", lwd, " must be a positive number.")
+
+  }#THEN
+
+  # the sanitization of "layout" and "shape" is left to the backend.
+
+  graphviz.compare.backend(netlist = netlist, nodes = nodes,
+    layout = layout, shape = shape, main = main, sub = sub, diff = diff,
+    diff.args = diff.args)
+
+  invisible(NULL)
+
+}#GRAPHVIZ.COMPARE
+

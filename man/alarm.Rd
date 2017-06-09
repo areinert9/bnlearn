@@ -58,9 +58,9 @@ data(alarm)
       factor with levels \code{TRUE} and \code{FALSE}.
     \item \code{PMB} (\emph{pulmonary embolus}): a two-level factor with levels
       \code{TRUE} and \code{FALSE}.
-    \item \code{INT} (\emph{intubation}): a three-level factor with levels 
+    \item \code{INT} (\emph{intubation}): a three-level factor with levels
       \code{NORMAL}, \code{ESOPHAGEAL} and \code{ONESIDED}.
-    \item \code{KINK} (\emph{kinked tube}): a two-level factor with levels 
+    \item \code{KINK} (\emph{kinked tube}): a two-level factor with levels
       \code{TRUE} and \code{FALSE}.
     \item \code{DISC} (\emph{disconnection}): a two-level factor with levels
       \code{TRUE} and \code{FALSE}.
@@ -76,7 +76,7 @@ data(alarm)
       \code{LOW}, \code{NORMAL} and \code{HIGH}.
     \item \code{ERCA} (\emph{electrocauter}): a two-level factor with levels
       \code{TRUE} and \code{FALSE}.
-    \item \code{SHNT} (\emph{shunt}): a two-level factor with levels 
+    \item \code{SHNT} (\emph{shunt}): a two-level factor with levels
       \code{NORMAL} and \code{HIGH}.
     \item \code{PVS} (\emph{pulmonary venous oxygen saturation}): a three-level
       factor with levels \code{LOW}, \code{NORMAL} and \code{HIGH}.

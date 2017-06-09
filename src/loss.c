@@ -264,7 +264,10 @@ SEXP temp_df;
   }/*ELSE*/
 
   /* switch to the negentropy. */
-  result /= -(ndata - *dropped);
+  if (ndata > *dropped)
+    result /= -(ndata - *dropped);
+  else
+    result = NA_REAL;
 
   return result;
 
@@ -356,7 +359,10 @@ SEXP try;
   }/*THEN*/
 
   /* switch to the negentropy. */
-  result /= -(ndata - *dropped);
+  if (ndata > *dropped)
+    result /= -(ndata - *dropped);
+  else
+    result = NA_REAL;
 
   return result;
 
@@ -381,7 +387,10 @@ double err = 0;
   }/*FOR*/
 
   /* rescale into a probability. */
-  err /= (ndata - dropped);
+  if (ndata > dropped)
+    err /= (ndata - dropped);
+  else
+    err = NA_REAL;
 
   /* print a warning if data were dropped. */
   if (dropped > 0)

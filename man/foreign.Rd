@@ -39,7 +39,7 @@ write.dot(file, graph)
 \note{
 
   All the networks present in the Bayesian Network Repository have associated
-  BIF, DSC and NET files that can be imported with \code{read.bif}, 
+  BIF, DSC and NET files that can be imported with \code{read.bif},
   \code{read.dsc} and \code{read.net}.
 
   HUGIN can import and export NET files; Netica can read (but not write) DSC

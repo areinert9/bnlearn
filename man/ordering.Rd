@@ -24,7 +24,7 @@ tiers2blacklist(nodes)
 \details{
 
   \code{ordering2blacklist} takes a vector of character strings (the labels of
-  the nodes), which specifies a complete node ordering. An object of class 
+  the nodes), which specifies a complete node ordering. An object of class
   \code{bn} or \code{bn.fit}; in that case, the node ordering is derived by
   the graph. In both cases, the blacklist returned by \code{ordering2blacklist}
   contains all the possible arcs that violate the specified node ordering.

@@ -18,7 +18,7 @@ strength.plot(x, strength, threshold, cutpoints, highlight = NULL,
   \item{threshold}{a numeric value. See below.}
   \item{cutpoints}{an array of numeric values. See below.}
   \item{highlight}{a list, see \code{\link{graphviz.plot}} for details.}
-  \item{layout}{a character string, the layout argument that will be passed to 
+  \item{layout}{a character string, the layout argument that will be passed to
     \pkg{Rgraphviz}. Possible values are \code{dots}, \code{neato},
     \code{twopi}, \code{circo} and \code{fdp}. See \pkg{Rgraphviz} documentation
     for details.}

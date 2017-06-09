@@ -22,8 +22,7 @@ mutilated(x, evidence)
   \item{event, evidence}{see below.}
   \item{nodes}{a vector of character strings, the labels of the nodes whose
     conditional distribution we are interested in.}
-  \item{cluster}{an optional cluster object from package \pkg{parallel}. See
-    \code{\link{parallel integration}} for details and a simple example.}
+  \item{cluster}{an optional cluster object from package \pkg{parallel}.}
   \item{method}{a character string, the method used to perform the conditional
     probability query. Currently only \emph{logic sampling} (\code{ls}, the
     default) and \emph{likelihood weighting} (\code{lw}) are implemented.}
@@ -61,7 +60,7 @@ mutilated(x, evidence)
   \itemize{
 
     \item \code{n}: a positive integer number, the number of random observations
-      to generate from \code{fitted}. The default value is 
+      to generate from \code{fitted}. The default value is
       \code{5000 * log10(nparams.fitted(fitted))} for discrete and coditional
       Gaussian networks and \code{500 * nparams.fitted(fitted)} for Gaussian
       networks.
@@ -75,7 +74,7 @@ mutilated(x, evidence)
       so \code{cpquery} and \code{cpdist} try to identify which nodes are used
       in \code{event} and \code{evidence} and reduce the network to their upper
       closure. \code{query.nodes} may be used to manually specify these nodes
-      when automatic identification fails; there is no reason to use it 
+      when automatic identification fails; there is no reason to use it
       otherwise.
 
   }

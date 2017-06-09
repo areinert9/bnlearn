@@ -72,7 +72,7 @@ bn.fit.backend.discrete = function(dag, node, data, method, extra.args,
   tab = cptattr(tab)
 
   if (debug)
-    cat("  > fitted ", length(tab), 
+    cat("  > fitted ", length(tab),
       ifelse(length(parents) > 0, " conditional", " marginal"),
       " probabilities.\n", sep = "")
 

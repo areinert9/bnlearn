@@ -23,7 +23,7 @@ data(coronary)
       with levels \code{no} and \code{yes}.
     \item \code{Pressure} (\emph{systolic blood pressure}): a two-level factor
       with levels \code{<140} and \code{>140}.
-    \item \code{Proteins} (\emph{ratio of beta and alpha lipoproteins}): a 
+    \item \code{Proteins} (\emph{ratio of beta and alpha lipoproteins}): a
       two-level factor with levels \code{<3} and \code{>3}.
     \item \code{Family} (\emph{family anamnesis of coronary heart disease}): a
       two-level factor with levels \code{neg} and \code{pos}.

@@ -120,7 +120,7 @@ impute = function(object, data, method = "parents", ..., debug = FALSE) {
   # check whether the data agree with the bayesian network.
   check.fit.vs.data(object, data)
   # check the imputation method.
-  check.label(method, choices = available.imputation.methods, 
+  check.label(method, choices = available.imputation.methods,
     labels = imputation.labels, argname = "imputation method", see = "impute")
   # check debug and prob.
   check.logical(debug)

@@ -333,7 +333,7 @@ SEXP table, dims, dimnames, cur;
   /* set the attributess for class and dimensions. */
   setAttrib(table, R_ClassSymbol, mkString("table"));
   setAttrib(table, R_DimSymbol, dims);
-  setAttrib(table, R_DimNamesSymbol, dimnames);   
+  setAttrib(table, R_DimNamesSymbol, dimnames);
 
   UNPROTECT(3);
 

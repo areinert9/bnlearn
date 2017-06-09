@@ -25,7 +25,7 @@
 }
 \examples{
 data(learning.test)
-dag = hc(learning.test, score = "bic") 
+dag = hc(learning.test, score = "bic")
 
 for (i in 1:3) {
 

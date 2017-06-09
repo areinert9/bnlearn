@@ -12,7 +12,7 @@ data(marks)
 }
 \format{
 
-  The \code{marks} data set contains the following variables, one for each 
+  The \code{marks} data set contains the following variables, one for each
   topic in the examination:
   \itemize{
 

@@ -3,7 +3,7 @@
 impute.backend.parents = function(fitted, data, debug = FALSE) {
 
   # check the variables in topological order, to ensure parents are complete.
-  for (i in schedule(fitted)) {
+  for (i in topological.ordering(fitted)) {
 
     if (debug)
       cat("* checking node", i, ".\n")
@@ -23,21 +23,21 @@ impute.backend.parents = function(fitted, data, debug = FALSE) {
     # call predict() backends so that arguments are not sanitized again.
     if (is(fitted, c("bn.fit.dnet", "bn.fit.onet", "bn.fit.donet"))) {
 
-      data[missing, i] = 
+      data[missing, i] =
         discrete.prediction(node = i, fitted = fitted, data = predict.from,
           prob = FALSE, debug = FALSE)
 
     }#THEN
     else if (is(fitted, "bn.fit.gnet")) {
 
-      data[missing, i] = 
+      data[missing, i] =
         gaussian.prediction(node = i, fitted = fitted, data = predict.from,
           debug = FALSE)
 
     }#THEN
     else if (is(fitted, "bn.fit.cgnet")) {
 
-      data[missing, i] = 
+      data[missing, i] =
         mixedcg.prediction(node = i, fitted = fitted, data = predict.from,
           debug = FALSE)
 
@@ -67,14 +67,14 @@ impute.backend.map = function(fitted, data, n, debug = FALSE) {
     if (length(from) == 0)
       evidence = TRUE
     else
-      evidence = lapply(data[j, from], 
+      evidence = lapply(data[j, from],
                    function(x) if (is.factor(x)) as.character(x))
 
     # simulate the particles and the weights using likelihood weighting.
-    particles = 
+    particles =
       conditional.probability.query(fitted = fitted, event = to,
         evidence = evidence, method = "lw",
-        extra = list(from = from, n = n), probability = FALSE, 
+        extra = list(from = from, n = n), probability = FALSE,
         cluster = NULL, debug = FALSE)
 
     # impute by posterior mode (discrete variables) or posterior expectation

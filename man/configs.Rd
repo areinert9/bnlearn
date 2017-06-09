@@ -29,7 +29,7 @@
 \value{
 
   A factor with one element for each row of \code{data}, and levels as
-  specified by \code{all}. 
+  specified by \code{all}.
 
 }
 \examples{

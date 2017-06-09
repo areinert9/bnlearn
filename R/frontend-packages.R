@@ -73,7 +73,7 @@ as.grain.bn.fit = function(x) {
       warning("NaN conditional probabilities in ", node,
         ", replaced with a uniform distribution.")
 
-      values[is.na(values)] <- 1/dim(values)[1]
+      values[is.na(values)] = 1/dim(values)[1]
 
     }#THEN
 
@@ -127,7 +127,7 @@ as.bn.fit.grain = function(x) {
 
   }#FOR
 
-  return(structure(fitted, class = c("bn.fit", guess.fitted.class(fitted))))
+  return(structure(fitted, class = c("bn.fit", determine.fitted.class(fitted))))
 
 }#AS.BN.FIT.GRAIN
 

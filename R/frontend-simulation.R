@@ -99,7 +99,7 @@ cpquery = function(fitted, event, evidence, cluster = NULL, method = "ls", ...,
 
   }#THEN
 
-  extra.args = check.cpq.args(fitted = fitted, event = NULL, 
+  extra.args = check.cpq.args(fitted = fitted, event = NULL,
                  extra.args = list(...), method = method, action = "cpquery")
 
   # deparse the expression for the event before passing it to

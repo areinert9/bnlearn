@@ -24,7 +24,7 @@
 \description{
 
  Assign, extract or compute various quantities of interest from an object of
- class \code{bn.fit}, \code{bn.fit.dnode}, \code{bn.fit.gnode}, 
+ class \code{bn.fit}, \code{bn.fit.dnode}, \code{bn.fit.gnode},
  \code{bn.fit.cgnode} or \code{bn.fit.onode}.
 
 }
@@ -67,7 +67,7 @@
     \code{k = 1} gives the expression used to compute AIC.}
   \item{by.sample}{a boolean value. If \code{TRUE}, \code{logLik} returns a
     vector containing the the log-likelihood of each observations in the
-    sample. If \code{FALSE}, \code{logLik} returns a single value, the 
+    sample. If \code{FALSE}, \code{logLik} returns a single value, the
     likelihood of the whole sample.}
 
 }
