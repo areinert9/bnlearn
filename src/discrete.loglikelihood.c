@@ -3,19 +3,27 @@
 #include "include/tests.h"
 #include "include/dataframe.h"
 
-double dlik(SEXP x, double *nparams) {
+double dlik(SEXP x, double *nparams, SEXP weights) {
 
 int i = 0;
 int *n = NULL, *xx = INTEGER(x), llx = NLEVELS(x), num = length(x);
 double res = 0;
 
   /* initialize the contingency table. */
-  fill_1d_table(xx, &n, llx, num);
+  fill_1d_table(xx, &n, llx, num, weights);
+  
+  
+  int s, *w;
+  w = INTEGER(weights);
+  s = 0;
+  for(i = 0; i < num; i++){
+    s += w[i];
+  }
 
   /* compute the entropy from the joint and marginal frequencies. */
   for (i = 0; i < llx; i++)
     if (n[i] != 0)
-      res += (double)n[i] * log((double)n[i] / num);
+      res += (double)n[i] * log((double)n[i] / s);
 
   /* we may want to store the number of parameters. */
   if (nparams)
@@ -27,13 +35,15 @@ double res = 0;
 
 }/*DLIK*/
 
-double cdlik(SEXP x, SEXP y, double *nparams) {
+double cdlik(SEXP x, SEXP y, double *nparams, SEXP weights) {
 
 int i = 0, j = 0, k = 0;
 int **n = NULL, *nj = NULL;
 int llx = NLEVELS(x), lly = NLEVELS(y), num = length(x);
 int *xx = INTEGER(x), *yy = INTEGER(y);
 double res = 0;
+int *w;
+w = INTEGER(weights);
 
   /* initialize the contingency table and the marginal frequencies. */
   n = (int **) Calloc2D(llx, lly, sizeof(int));
@@ -41,7 +51,7 @@ double res = 0;
 
   /* compute the joint frequency of x and y. */
   for (k = 0; k < num; k++)
-    n[xx[k] - 1][yy[k] - 1]++;
+    n[xx[k] - 1][yy[k] - 1]+=w[k];
 
   /* compute the marginals. */
   for (i = 0; i < llx; i++)
@@ -66,7 +76,7 @@ double res = 0;
 
 }/*CDLIK*/
 
-double loglik_dnode(SEXP target, SEXP x, SEXP data, double *nparams, int debuglevel) {
+double loglik_dnode(SEXP target, SEXP x, SEXP data, double *nparams, int debuglevel, SEXP weights) {
 
 double loglik = 0;
 char *t = (char *)CHAR(STRING_ELT(target, 0));
@@ -82,7 +92,7 @@ SEXP nodes, node_t, parents, data_t, parent_vars, config;
 
   if (length(parents) == 0) {
 
-    loglik = dlik(data_t, nparams);
+    loglik = dlik(data_t, nparams, weights);
 
   }/*THEN*/
   else {
@@ -91,7 +101,7 @@ SEXP nodes, node_t, parents, data_t, parent_vars, config;
     PROTECT(parent_vars = c_dataframe_column(data, parents, FALSE, FALSE));
     PROTECT(config = c_configurations(parent_vars, TRUE, TRUE));
     /* compute the log-likelihood. */
-    loglik = cdlik(data_t, config, nparams);
+    loglik = cdlik(data_t, config, nparams, weights);
 
     UNPROTECT(2);
 

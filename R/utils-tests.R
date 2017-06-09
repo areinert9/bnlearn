@@ -28,10 +28,10 @@ is.acyclic = function(arcs, nodes, return.nodes = FALSE, directed = FALSE,
 }#IS.ACYCLIC.BACKEND
 
 # compute the sample size / CPT cells ratio.
-obs.per.cell = function(x, y, z = NULL, data) {
+obs.per.cell = function(x, y, z = NULL, data, weights) {
 
   opc = 0
-  ndata = nrow(data)
+  ndata = sum(weights)
   nlx = nlevels(data[, x])
   nly = nlevels(data[, y])
 

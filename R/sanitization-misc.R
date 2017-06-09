@@ -34,7 +34,7 @@ check.data = function(x, allowed.types = available.data.types,
 
       # warn about levels with zero frequencies, it's not necessarily wrong
       # (data frame subsetting) but sure is fishy.
-      if (!allow.levels && any(minimal.table(x[, col, drop = FALSE]) == 0))
+      if (!allow.levels && any(minimal.table(x[, col, drop = FALSE], as.integer(rep(1,nrow(x)))) == 0))
         warning("variable ", col, " has levels that are not observed in the data.")
 
     }#FOR
@@ -362,7 +362,7 @@ check.customlist = function(custom, nodes) {
 
       stop("x must be a list of objects of class 'bn' or of arc sets.")
 
-    }#ELSE
+    }
 
   return(TRUE)
 
@@ -1618,6 +1618,27 @@ check.fit.node.vs.data = function(fitted, data) {
 
 }#CHECK.FIT.NODE.VS.DATA
 
+# check a colour identifier (not necessarily a string/integer).
+check.colour = function(col) {
+
+  if (identical(tryCatch(col2rgb(col), error = function(x) { FALSE }), FALSE))
+    stop(sprintf("%s is not a valid colour identifier.",
+           deparse(substitute(col))))
+
+}#CHECK.COLOUR
+
+# check the line type identifier.
+check.lty = function(lty) {
+
+  lty.strings = c("blank", "solid", "dashed", "dotted", "dotdash", "longdash",
+                  "twodash")
+
+  if ((lty %!in% 0:6) && (lty %!in% lty.strings))
+    stop(sprintf("%s is not a valid line type identifier.",
+           deparse(substitute(lty))))
+
+}#CHECK.LTY
+
 # check the label of a learning algorithm.
 check.learning.algorithm = function(algorithm, class = "all", bn) {
 
@@ -1659,7 +1680,7 @@ check.learning.algorithm = function(algorithm, class = "all", bn) {
 
 }#CHECK.LEARNING.ALGORITHM
 
-# check the arguments of a learning algorithm (for use in bootstrap).
+# check the aruments of a learning algorithm (for use in bootstrap).
 check.learning.algorithm.args = function(args, algorithm, bn) {
 
   # convert args into a list, if it's not one already.

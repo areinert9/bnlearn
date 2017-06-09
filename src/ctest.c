@@ -61,7 +61,7 @@
 
 /* parametric tests for discrete variables. */
 static double ct_discrete(SEXP xx, SEXP yy, SEXP zz, int nobs, int ntests,
-    double *pvalue, double *df, test_e test) {
+    double *pvalue, double *df, test_e test, SEXP weights, int nobs_w) {
 
 int i = 0, llx = 0, lly = NLEVELS(yy), llz = 0;
 int *xptr = NULL, *yptr = INTEGER(yy), *zptr = NULL;
@@ -77,24 +77,24 @@ SEXP xdata, config;
     if (test == MI || test == MI_ADF || test == X2 || test == X2_ADF) {
 
       /* mutual information and Pearson's X^2 asymptotic tests. */
-      statistic = c_cchisqtest(xptr, llx, yptr, lly, zptr, llz, nobs, df, test);
+      statistic = c_cchisqtest(xptr, llx, yptr, lly, zptr, llz, nobs, df, test, weights, nobs_w);
       if ((test == MI) || (test == MI_ADF))
-        statistic = 2 * nobs * statistic;
+        statistic = 2 * nobs_w * statistic;
       pvalue[i] = pchisq(statistic, *df, FALSE, FALSE);
 
     }/*THEN*/
     else if (test == MI_SH) {
 
       /* shrinkage mutual information test. */
-      statistic = 2 * nobs * c_shcmi(xptr, llx, yptr, lly, zptr, llz,
-                               nobs, df);
+      statistic = 2 * nobs_w * c_shcmi(xptr, llx, yptr, lly, zptr, llz,
+                               nobs, df, weights, nobs_w);
       pvalue[i] = pchisq(statistic, *df, FALSE, FALSE);
 
     }/*THEN*/
     else if (test == JT) {
 
       /* Jonckheere-Terpstra test. */
-      statistic = c_cjt(xptr, llx, yptr, lly, zptr, llz, nobs);
+      statistic = c_cjt(xptr, llx, yptr, lly, zptr, llz, nobs, weights, nobs_w);
       pvalue[i] = 2 * pnorm(fabs(statistic), 0, 1, FALSE, FALSE);
 
     }/*THEN*/
@@ -304,18 +304,21 @@ SEXP xdata;
     if ((ytype == INTSXP) && (xtype == INTSXP)) {
 
       if (ngp > 0) {
-
+        SEXP weights;
+        int nobs_w;
         /* need to reverse conditioning to actually compute the test. */
         statistic = 2 * nobs * nobs *
                       c_cmicg_unroll(xptr, llx, yptr, lly, zptr, llz,
-                                 gp + 1, ngp, df, nobs);
+                                 gp + 1, ngp, df, nobs, weights, nobs_w); /*DUMMY*/
 
       }/*THEN*/
       else {
+        SEXP weights;
+        int nobs_w;
 
         /* the test reverts back to a discrete mutual information test. */
         statistic = 2 * nobs * c_cchisqtest(xptr, llx, yptr, lly, zptr, llz,
-                                 nobs, df, MI);
+                                 nobs, df, MI, weights, nobs_w); /*DUMMY*/
 
       }/*ELSE*/
 
@@ -426,7 +429,7 @@ double **column = NULL, *yptr = REAL(yy), statistic = 0;
 
 /* conditional independence tests. */
 SEXP ctest(SEXP x, SEXP y, SEXP sx, SEXP data, SEXP test, SEXP B, SEXP alpha,
-    SEXP learning) {
+    SEXP learning, SEXP weights) {
 
 int ntests = length(x), nobs = 0;
 double *pvalue = NULL, statistic = 0, df = NA_REAL;
@@ -448,9 +451,16 @@ SEXP xx, yy, zz, result;
   nobs = length(yy);
 
   if (IS_DISCRETE_ASYMPTOTIC_TEST(test_type)) {
+    
+    int i, nobs_w = 0, *w;
+    w = INTEGER(weights);
+    
+    for(i = 0; i < nobs; i++){
+      nobs_w += w[i];
+    }
 
     /* parametric tests for discrete variables. */
-    statistic = ct_discrete(xx, yy, zz, nobs, ntests, pvalue, &df, test_type);
+    statistic = ct_discrete(xx, yy, zz, nobs, ntests, pvalue, &df, test_type, weights, nobs_w);
 
   }/*THEN*/
   else if ((test_type == COR) || (test_type == ZF) || (test_type == MI_G) ||

@@ -83,8 +83,10 @@ logLik.bn = function(object, data, ...) {
 
 }#LOGLIK.BN
 
-alpha.star = function(x, data, debug = FALSE) {
 
+alpha.star = function(x, data, debug = FALSE) {
+  
+  warning("weights used insight function but passsing not implemented")
   # check x's class.
   check.bn(x)
   # the original data set is needed.

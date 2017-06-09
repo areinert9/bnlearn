@@ -12,7 +12,7 @@ aracne.backend = function(x, estimator, whitelist, blacklist, debug = FALSE) {
     # keep only one direction for each blacklisted arc.
     blacklist = pdag2dag.backend(blacklist, nodes)
 
-  }#THEN
+  }#THEN very important change
 
   if (!is.null(whitelist)) {
 

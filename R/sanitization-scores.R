@@ -62,7 +62,7 @@ is.score.equivalent = function(score, nodes, extra) {
 is.score.decomposable = function(score, extra) {
 
   # Castelo & Siebes prior is not decomposable.
-  if ((score %in% c("bde", "bds", "bdj", "mbde", "bdla", "bge")) &&
+  if ((score %in% c("bde", "bds", "bdj", "mbde", "bge")) &&
       (extra$prior %in% c("cs", "marginal")))
     return(FALSE)
 
@@ -78,15 +78,23 @@ check.score.args = function(score, network, data, extra.args, learning = FALSE) 
   if (score %in% c("bde", "bds", "mbde", "bge"))
     extra.args$iss = check.iss(iss = extra.args$iss,
       network = network, data = data)
+  
+  #DIFF add weights if empty
+  if (score %in% c("bde", "bds", "bdj", "mbde", "k2", "aic", "bic", "loglik")){
+    if (is.null(extra.args$weights)){  
+      extra.args$weights = as.integer(rep(1,nrow(data)))
+    }else
+      extra.args$weights = as.integer(extra.args$weights)
+  }
 
   # check the graph prior distribution.
-  if (score %in% c("bde", "bds", "bdj", "mbde", "bdla", "bge"))
+  if (score %in% c("bde", "bds", "bdj", "mbde", "bge"))
     extra.args$prior = check.graph.prior(prior = extra.args$prior,
       network = network)
 
   # check the sparsity parameter of the graph prior distribution.
-  if (score %in% c("bde", "bds", "bdj", "mbde", "bdla", "bge"))
-    extra.args$beta = check.graph.hyperparameters(beta = extra.args$beta,
+  if (score %in% c("bde", "bds", "bdj", "mbde", "bge"))
+    extra.args$beta = check.graph.sparsity(beta = extra.args$beta,
       prior = extra.args$prior, network = network, data = data,
       learning = learning)
 
@@ -98,16 +106,12 @@ check.score.args = function(score, network, data, extra.args, learning = FALSE) 
   # check the likelihood penalty.
   if (score %in% c("aic", "bic", "aic-g", "bic-g", "aic-cg", "bic-cg"))
     extra.args$k = check.penalty(k = extra.args$k, network = network,
-      data = data, score = score)
+      data = data, score = score, weights = extra.args$weights)
 
   # check phi estimator.
   if (score == "bge")
     extra.args$phi = check.phi(phi = extra.args$phi,
       network = network, data = data)
-
-  # check the number of scores to average.
-  if (score == "bdla")
-    extra.args$l = check.l(l = extra.args$l)
 
   check.unused.args(extra.args, score.extra.args[[score]])
 
@@ -229,7 +233,7 @@ check.experimental = function(exp, network, data) {
 }#CHECK.EXPERIMENTAL
 
 # check the penalty used in AIC and BIC.
-check.penalty = function(k, network, data, score) {
+check.penalty = function(k, network, data, score, weights) {
 
   if (!is.null(k)) {
 
@@ -240,7 +244,7 @@ check.penalty = function(k, network, data, score) {
     # warn if using a non-standard penalty.
     if (grepl("^aic", score) && (k != 1))
       warning("using AIC with a non-standard penalty k = ", k, ".")
-    if (grepl("^bic", score) && (k != log(nrow(data))/2))
+    if (grepl("^bic", score) && (k != log(sum(weights))/2))
       warning("using BIC with a non-standard penalty k = ", k, ".")
 
   }#THEN
@@ -251,7 +255,7 @@ check.penalty = function(k, network, data, score) {
     if (!is.null(network$learning$args$k) && (score == network$learning$test))
       k = network$learning$args$k
     else
-      k = ifelse(grepl("^aic", score), 1, log(nrow(data))/2)
+      k = ifelse(grepl("^aic", score), 1, log(sum(weights))/2)
 
   }#ELSE
 
@@ -288,8 +292,7 @@ check.graph.prior = function(prior, network) {
 }#CHECK.GRAPH.PRIOR
 
 # check the sparsity parameter of the prior distribution over the graph space.
-check.graph.hyperparameters = function(beta, prior, network, data,
-    learning = FALSE) {
+check.graph.sparsity = function(beta, prior, network, data, learning = FALSE) {
 
   default.beta =
     list("uniform" = NULL, "vsp" = 1/ncol(data),
@@ -352,16 +355,24 @@ check.graph.hyperparameters = function(beta, prior, network, data,
 
 }#CHECK.GRAPH.SPARSITY
 
-# check the number of scores to average.
-check.l = function(l) {
+# check the threshold on the maximum number of parents.
+check.maxp = function(maxp, data) {
 
-  if (is.null(l))
-    l = 5
-  else
-    if (!is.positive.integer(l))
-      stop("l must be a positive integer, the number of scores to average.")
+  if (is.null(maxp)) {
 
-  return(as.numeric(l))
+    maxp = Inf
 
-}#CHECK.L
+  }#THEN
+  else if (!isTRUE(all.equal(maxp, Inf))) {
+
+    if (!is.positive.integer(maxp))
+      stop("maxp must be a positive number.")
+    if (maxp >= ncol(data))
+      warning("maximum number of parents should be lower than the number of nodes, the limit will be ignored.")
+
+  }#ELSE
+
+  return(as.numeric(maxp))
+
+}#CHECK.MAXP
 

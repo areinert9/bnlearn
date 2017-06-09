@@ -5,18 +5,18 @@
 static double c_jt_stat(int **n, int *ni, int llx, int lly);
 
 /* unconditional Jonckheere-Terpstra asymptotic test for use in C code. */
-double c_jt(int *xx, int llx, int *yy, int lly, int num) {
+double c_jt(int *xx, int llx, int *yy, int lly, int num, SEXP weights, int nobs_w) {
 
 int  **n = NULL, *ni = NULL, *nj = NULL;
 double stat = 0, mean = 0, var = 0;
 
   /* initialize the contingency table and the marginal frequencies. */
-  fill_2d_table(xx, yy, &n, &ni, &nj, llx, lly, num);
+  fill_2d_table(xx, yy, &n, &ni, &nj, llx, lly, num, weights);
 
   /* compute the test statistic, its mean and it variance. */
   stat = c_jt_stat(n, ni, llx, lly);
-  mean = c_jt_mean(num, ni, llx);
-  var = c_jt_var(num, ni, llx, nj, lly);
+  mean = c_jt_mean(nobs_w, ni, llx);
+  var = c_jt_var(nobs_w, ni, llx, nj, lly);
 
   Free2D(n, llx);
   Free1D(ni);
@@ -30,13 +30,13 @@ double stat = 0, mean = 0, var = 0;
 }/*C_JT*/
 
 /* conditional Jonckheere-Terpstra asymptotic test for use in C code. */
-double c_cjt(int *xx, int llx, int *yy, int lly, int *zz, int llz, int num) {
+double c_cjt(int *xx, int llx, int *yy, int lly, int *zz, int llz, int num, SEXP weights, int nobs_w) {
 
 int k = 0, ***n = NULL, **nrowt = NULL, **ncolt = NULL, *ncond = NULL;
 double stat = 0, var = 0, tvar = 0;
 
   /* initialize the contingency table and the marginal frequencies. */
-  fill_3d_table(xx, yy, zz, &n, &nrowt, &ncolt, &ncond, llx, lly, llz, num);
+  fill_3d_table(xx, yy, zz, &n, &nrowt, &ncolt, &ncond, llx, lly, llz, num, weights);
 
   /* sum up over the parents' configurations. */
   for (k = 0; k < llz; k++) {

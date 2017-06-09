@@ -2,7 +2,7 @@
 # constraint-based learning algorithms.
 bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     test = NULL, alpha = NULL, B = NULL, method = "gs", debug = FALSE,
-    optimized = FALSE, strict = FALSE, undirected = FALSE) {
+    optimized = FALSE, strict = FALSE, undirected = FALSE, weights = NULL) {
 
   reset.test.counter()
 
@@ -11,6 +11,13 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
   # check the data are there.
   check.data(x)
+  
+  if (is.null(weights)){
+    weights = as.integer(rep(1,nrow(x)))
+  }else{
+    weights = as.integer(weights)
+  }
+  
   # check the algorithm.
   check.learning.algorithm(method, class = "constraint")
   # check test labels.
@@ -62,14 +69,14 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = grow.shrink.optimized(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug)
+             strict = strict, debug = debug, weights = weights)
 
     }#THEN
     else {
 
       mb = grow.shrink(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha,
-             B = B, strict = strict, debug = debug, cluster = cluster)
+             B = B, strict = strict, debug = debug, cluster = cluster, weights = weights)
 
     }#ELSE
 
@@ -80,14 +87,14 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = incremental.association.optimized(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug)
+             strict = strict, debug = debug, weights = weights)
 
     }#THEN
     else {
 
       mb = incremental.association(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug, cluster = cluster)
+             strict = strict, debug = debug, cluster = cluster, weights = weights)
 
     }#ELSE
 
@@ -98,14 +105,14 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = fast.incremental.association.optimized(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug)
+             strict = strict, debug = debug, weights = weights)
 
     }#THEN
     else {
 
       mb = fast.incremental.association(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug, cluster = cluster)
+             strict = strict, debug = debug, cluster = cluster, weights = weights)
 
     }#ELSE
 
@@ -116,14 +123,14 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = inter.incremental.association.optimized(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug)
+             strict = strict, debug = debug, weights = weights)
 
     }#THEN
     else {
 
       mb = inter.incremental.association(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug, cluster = cluster)
+             strict = strict, debug = debug, cluster = cluster, weights = weights)
 
     }#ELSE
 
@@ -134,14 +141,14 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = maxmin.pc.optimized(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug)
+             strict = strict, debug = debug, weights = weights)
 
     }#THEN
     else {
 
       mb = maxmin.pc(x = x, whitelist = whitelist, blacklist = full.blacklist,
              test = test, alpha = alpha, B = B, strict = strict, debug = debug,
-             cluster = cluster)
+             cluster = cluster, weights = weights)
 
     }#ELSE
 
@@ -152,14 +159,14 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = si.hiton.pc.optimized(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug)
+             strict = strict, debug = debug, weights = weights)
 
     }#THEN
     else {
 
       mb = si.hiton.pc.backend(x = x, whitelist = whitelist,
              blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-             strict = strict, debug = debug, cluster = cluster)
+             strict = strict, debug = debug, cluster = cluster, weights = weights)
 
     }#ELSE
 
@@ -171,7 +178,7 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     arcs = nbr2arcs(mb)
     learning = list(whitelist = whitelist, blacklist = blacklist,
       test = test, args = list(alpha = alpha), optimized = optimized,
-      ntests = test.counter())
+      ntests = test.counter(), weights = weights)
 
     # include also the number of permutations/bootstrap samples
     # if it makes sense.
@@ -187,7 +194,7 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     # recover some arc directions.
     res = second.principle(x = x, mb = mb, whitelist = whitelist,
             blacklist = full.blacklist, test = test, alpha = alpha, B = B,
-            strict = strict, debug = debug)
+            strict = strict, debug = debug, weights = weights)
     # return the user-specified blacklist, not the full one, as in other
     # classes of learning algorithms.
     res$learning["blacklist"] = list(blacklist)

@@ -21,12 +21,6 @@ bnlearn (4.2)
      variables (thanks David Chen).
   * improved argument sanitization in custom.fit() and model string functions.
   * added a BF() function to compute Bayes factors.
-  * added a graphviz.compare() function to visually compare network structures.
-  * implemented the locally averaged Bayesian Dirichlet score.
-  * custom.strength() now accepts bn.kcv and bn.kcv objects and computes arc
-     strengths from the networks learned by bn.cv() in the context of
-     cross-validation.
-
 
 bnlearn (4.1)
 

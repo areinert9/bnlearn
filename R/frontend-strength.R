@@ -89,22 +89,7 @@ custom.strength = function(networks, nodes, weights = NULL, cpdag = TRUE,
   # check the node labels.
   check.nodes(nodes)
   # check networks.
-  if (is(networks, c("bn.kcv", "bn.kcv.list"))) {
-
-    extract = function(x) bn.net(x$fitted)
-
-    if (is(networks, "bn.kcv"))
-      networks = lapply(networks, extract)
-    else if (is(networks, "bn.kcv.list")) {
-
-      networks = lapply(networks, function(x) lapply(x, extract))
-      networks = do.call("c", networks)
-
-    }#THEN
-
-  }#THEN
-  else
-    check.customlist(networks, nodes = nodes)
+  check.customlist(networks, nodes = nodes)
   # check the weights.
   weights = check.weights(weights, length(networks))
 

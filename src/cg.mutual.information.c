@@ -83,7 +83,7 @@ int *z1 = NULL, nz1 = 0;
 /* conditional mutual information between two discrete variables, conditional
  * on both discrete and continuous variables. */
 double c_cmicg_unroll(int *xx, int llx, int *yy, int lly, int *zz, int llz,
-    double **gp, int ngp, double *df, int num) {
+    double **gp, int ngp, double *df, int num, SEXP weights, int nobs_w) {
 
 int i = 0, llz2 = 0, tlvls[2] = {0, 0};
 int *tt[2] = {NULL, NULL}, *zz2 = NULL;
@@ -96,7 +96,7 @@ double logden = 0, lognum = 0;
     llz2 = lly;
 
     /* remainder term: the mutual information test of xx and yy. */
-    lognum = c_chisqtest(xx, llx, yy, lly, num, df, MI);
+    lognum = c_chisqtest(xx, llx, yy, lly, num, df, MI, weights, nobs_w);
 
   }/*THEN*/
   else {
@@ -110,7 +110,7 @@ double logden = 0, lognum = 0;
     c_fast_config(tt, num, 2, tlvls, zz2, &llz2, 1);
 
     /* remainder term: the mutual information test of xx and yy given zz. */
-    lognum = c_cchisqtest(xx, llx, yy, lly, zz, llz, num, df, MI);
+    lognum = c_cchisqtest(xx, llx, yy, lly, zz, llz, num, df, MI, weights, nobs_w);
 
   }/*ELSE*/
 

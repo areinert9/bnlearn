@@ -133,12 +133,18 @@
 
 /* parametric tests for discrete variables. */
 static void rrd_discrete(SEXP xx, SEXP zz, int *ff, SEXP x, SEXP z, int nobs,
-    int nz, test_e test, double *pvalue, double alpha, int debuglevel) {
+    int nz, test_e test, double *pvalue, double alpha, int debuglevel, SEXP weights) {
 
 int i = 0, j = 0, k = 0, cur = 0, llx = NLEVELS(xx), lly = 0, llz = 0;
 int *xptr = INTEGER(xx), *yptr = NULL, *zptr = NULL, valid = nz;
 int **column = NULL, **subset = NULL, *sublvls = NULL, *nlvls = NULL;
 double statistic = 0, df = 0;
+int nobs_w=0;
+int *w;
+w = INTEGER(weights);
+for(i=0;i<nobs; i++){
+  nobs_w += w[i];
+}
 
   DISCRETE_CACHE();
   ALLOC_DISCRETE_SUBSET();
@@ -151,23 +157,23 @@ double statistic = 0, df = 0;
     if (test == MI || test == MI_ADF || test == X2 || test == X2_ADF) {
 
       /* mutual information and Pearson's X^2 asymptotic tests. */
-      statistic = c_cchisqtest(xptr, llx, yptr, lly, zptr, llz, nobs, &df, test);
+      statistic = c_cchisqtest(xptr, llx, yptr, lly, zptr, llz, nobs, &df, test, weights, nobs_w);
       if ((test == MI) || (test == MI_ADF))
-        statistic = 2 * nobs * statistic;
+        statistic = 2 * nobs_w * statistic;
       pvalue[cur++] = pchisq(statistic, df, FALSE, FALSE);
 
     }/*THEN*/
     else if (test == MI_SH) {
 
       /* shrinkage mutual information test. */
-      statistic = c_shcmi(xptr, llx, yptr, lly, zptr, llz, nobs, &df);
-      pvalue[cur++] = pchisq(2 * nobs * statistic, df, FALSE, FALSE);
+      statistic = c_shcmi(xptr, llx, yptr, lly, zptr, llz, nobs, &df, weights, nobs_w);
+      pvalue[cur++] = pchisq(2 * nobs_w * statistic, df, FALSE, FALSE);
 
     }/*THEN*/
     else if (test == JT) {
 
       /* Jonckheere-Terpstra test. */
-      statistic = c_cjt(xptr, llx, yptr, lly, zptr, llz, nobs);
+      statistic = c_cjt(xptr, llx, yptr, lly, zptr, llz, nobs, weights, nobs_w);
       pvalue[cur++] = 2 * pnorm(fabs(statistic), 0, 1, FALSE, FALSE);
 
     }/*THEN*/
@@ -364,19 +370,23 @@ void *xptr = NULL, *yptr = NULL, **column = NULL;
 
       /* check whether the conditioning set is valid. */
       if (ngp > 0) {
+        int nobs_w;
+        SEXP weights;
 
         /* need to reverse conditioning to actually compute the test. */
         statistic = 2 * nobs * nobs *
                       c_cmicg_unroll(xptr, llx, yptr, lly, zptr, llz,
-                                       gp + 1, ngp, &df, nobs);
+                                       gp + 1, ngp, &df, nobs, weights, nobs_w); /* DUMMY */ 
 
       }/*THEN*/
-      else {
+      else {     
+        int nobs_w;
+        SEXP weights;
 
         /* if both nodes are discrete, the test reverts back to a discrete
          * mutual information test. */
         statistic = 2 * nobs * c_cchisqtest(xptr, llx, yptr, lly, zptr, llz,
-                                 nobs, &df, MI);
+                                 nobs, &df, MI, weights, nobs_w); /* DUMMY */ 
 
       }/*ELSE*/
 
@@ -499,7 +509,7 @@ double statistic = 0;
 }/*RRD_GPERM*/
 
 SEXP roundrobin_test(SEXP x, SEXP z, SEXP fixed, SEXP data, SEXP test, SEXP B,
-    SEXP alpha, SEXP debug) {
+    SEXP alpha, SEXP debug, SEXP weights) {
 
 int nz = length(z), nf = length(fixed), nobs = 0;
 int *ff = NULL, debuglevel = isTRUE(debug);
@@ -525,7 +535,7 @@ SEXP xx, zz, try, result;
   if (IS_DISCRETE_ASYMPTOTIC_TEST(test_type)) {
 
     /* parametric tests for discrete variables. */
-    rrd_discrete(xx, zz, ff, x, z, nobs, nz, test_type, pvalue, a, debuglevel);
+    rrd_discrete(xx, zz, ff, x, z, nobs, nz, test_type, pvalue, a, debuglevel, weights);
 
   }/*THEN*/
   else if ((test_type == COR) || (test_type == ZF) || (test_type == MI_G) ||

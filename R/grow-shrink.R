@@ -1,6 +1,6 @@
 
 grow.shrink.optimized = function(x, whitelist, blacklist, test, alpha,
-  B, strict, debug = FALSE) {
+  B, strict, debug = FALSE, weights) {
 
   nodes = names(x)
   mb2 = mb = list()
@@ -12,7 +12,7 @@ grow.shrink.optimized = function(x, whitelist, blacklist, test, alpha,
 
     mb[[node]] = gs.markov.blanket(node, data = x, nodes = nodes,
          alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
-         backtracking = backtracking, test = test, debug = debug)
+         backtracking = backtracking, test = test, debug = debug, weights = weights)
 
   }#FOR
 
@@ -42,14 +42,14 @@ grow.shrink.optimized = function(x, whitelist, blacklist, test, alpha,
 }#GROW.SHRINK.OPTIMIZED
 
 grow.shrink = function(x, cluster = NULL, whitelist, blacklist, test, alpha, B,
-  strict, debug = FALSE) {
+  strict, debug = FALSE, weights) {
 
   nodes = names(x)
 
   # 1. [Compute Markov Blankets]
   mb = smartSapply(cluster, as.list(nodes), gs.markov.blanket, data = x,
          nodes = nodes, alpha = alpha, B = B, whitelist = whitelist,
-         blacklist = blacklist, test = test, debug = debug)
+         blacklist = blacklist, test = test, debug = debug, weights = weights)
   names(mb) = nodes
 
   # check markov blankets for consistency.
@@ -58,7 +58,7 @@ grow.shrink = function(x, cluster = NULL, whitelist, blacklist, test, alpha, B,
   # 2. [Compute Graph Structure]
   mb = smartSapply(cluster, as.list(nodes), neighbour, mb = mb, data = x,
          alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
-         test = test, debug = debug)
+         test = test, debug = debug, weights = weights)
   names(mb) = nodes
 
   # check neighbourhood sets for consistency.
@@ -69,7 +69,7 @@ grow.shrink = function(x, cluster = NULL, whitelist, blacklist, test, alpha, B,
 }#GROW.SHRINK
 
 gs.markov.blanket = function(x, data, nodes, alpha, B, whitelist, blacklist,
-  start = character(0), backtracking = NULL, test, debug = FALSE) {
+  start = character(0), backtracking = NULL, test, debug = FALSE, weights) {
 
   nodes = nodes[nodes != x]
   known.good = known.bad = c()
@@ -134,7 +134,7 @@ gs.markov.blanket = function(x, data, nodes, alpha, B, whitelist, blacklist,
         cat("  * checking node", y, "for inclusion.\n")
 
       a = indep.test(x, y, mb, data = data, test = test, B = B,
-            alpha = alpha)
+            alpha = alpha, weights = weights)
 
       if (a <= alpha) {
 
@@ -184,10 +184,10 @@ gs.markov.blanket = function(x, data, nodes, alpha, B, whitelist, blacklist,
         cat("  * checking node", y, "for exclusion (shrinking phase).\n")
 
       a = indep.test(x, y, mb[mb != y], data = data, test = test, B = B,
-            alpha = alpha)
+            alpha = alpha, weights = weights)
 
       if (a > alpha) {
-
+ 
         # update the markov blanket.
         mb = mb[mb != y]
         # do not check the same node again.

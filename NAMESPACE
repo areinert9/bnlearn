@@ -13,7 +13,7 @@ export(
   "naive.bayes", "tree.bayes",
   # whitelists and blacklists.
   "whitelist", "blacklist", "ordering2blacklist", "tiers2blacklist",
-  # functions to compare network structures.
+  # function to compare network structures.
   "compare", "hamming", "shd", "choose.direction",
   # get neighbours and Markov blankets.
   "mb", "nbr",
@@ -40,7 +40,7 @@ export(
   # v-structures and d-separation.
   "vstructs", "dsep",
   # plotting network structures.
-  "graphviz.plot", "strength.plot", graphviz.compare,
+  "graphviz.plot", "strength.plot",
   # fitted Bayesian networks.
   "bn.fit", "custom.fit", "bn.net",
   # plotting fitted Bayesian networks.
@@ -62,7 +62,8 @@ export(
   # assorted functions to extract information.
   "configs", "nparams", "ntests", "sigma",
   # assorted conversion functions.
-  "as.bn", "as.bn.fit", "as.grain", "as.graphNEL", "as.graphAM"
+  "as.bn", "as.bn.fit", "as.grain", "as.graphNEL", "as.graphAM",
+  "minimal.table", "per.node.score"
 )
 
 useDynLib(bnlearn, .registration = TRUE)
@@ -101,7 +102,6 @@ S3method(as.graphNEL, bn.fit)
 S3method(as.graphAM, bn)
 S3method(as.bn, graphAM)
 S3method(as.graphAM, bn.fit)
-S3method(print, "bn.tan")
 S3method(print, "bn.fit")
 S3method(print, "bn.fit.dnode")
 S3method(print, "bn.fit.onode")

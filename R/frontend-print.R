@@ -90,8 +90,6 @@ print.bn = function(x, ...) {
       wcat("  permutations:                         ", format(x$learning$args$B))
     if ("iss" %in% params)
       wcat("  imaginary sample size:                ", format(x$learning$args$iss))
-    if ("l" %in% params)
-      wcat("  imaginary sample size stepping:       ", format(x$learning$args$l))
     if ("phi" %in% params)
       wcat("  phi matrix structure:                 ", x$learning$args$phi)
     if ("k" %in% params)
@@ -169,33 +167,8 @@ print.bn.fit = function(x, order, ...) {
 
 }#PRINT.BN.FIT
 
-# print method for class bn.tan.
-print.bn.tan = function(x, ...) {
-
-  # warn about unused arguments.
-  check.unused.args(list(...), character(0))
-
-  if (is(x, "bn"))
-    print.bn(x)
-  else if (is(x, "bn.fit")) {
-
-    training = attr(x, "training")
-
-    for (i in names(x)) {
-
-      if (length(x[[i]]$parents) >= 2)
-        print(x[[i]], perm = c(i, setdiff(x[[i]]$parents, training), training))
-      else
-        print(x[[i]])
-
-    }#FOR
-
-  }#THEN
-
-}#PRINT.BN.TAN
-
 # print method for class bn.fit.dnode.
-print.bn.fit.dnode = function(x, perm, ...) {
+print.bn.fit.dnode = function(x, ...) {
 
   # warn about unused arguments.
   check.unused.args(list(...), character(0))
@@ -206,10 +179,7 @@ print.bn.fit.dnode = function(x, perm, ...) {
     cat("\n  Parameters of node", x$node, "(ordinal distribution)\n")
 
   cat("\nConditional probability table:\n", ifelse(length(x$parents) > 0, "\n", ""))
-  if (missing(perm))
-    print(x$prob)
-  else
-    print(aperm(x$prob, perm = perm))
+  print(x$prob)
 
   invisible(x)
 

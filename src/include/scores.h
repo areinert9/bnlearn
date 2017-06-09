@@ -9,8 +9,7 @@ typedef enum {
   BDS       =  5, /* Bayesian Dirichlet sparse score. */
   BDJ       =  6, /* Bayesian Dirichlet with Jeffrey's prior. */
   K2        =  7, /* K2 score. */
-  MBDE      =  8, /* Bayesian Dirichlet equivalent score, interventional data .*/
-  BDLA      =  9, /* Bayesian Dirichlet score, locally averaged. */
+  MBDE      =  8, /* Bayesian Dirichlet equivalent score, interventional data.*/
   LOGLIK_G  = 10, /* log-likelihood, Gaussian data. */
   AIC_G     = 11, /* AIC, Gaussian data. */
   BIC_G     = 12, /* BIC, Gaussian data. */
@@ -50,7 +49,7 @@ void c_per_node_score(SEXP network, SEXP data, SEXP score, SEXP targets,
 /* score functions exported to per.node.score.c */
 double dlik(SEXP x, double *nparams);
 double cdlik(SEXP x, SEXP y, double *nparams);
-double loglik_dnode(SEXP target, SEXP x, SEXP data, double *nparams, int debuglevel);
+double loglik_dnode(SEXP target, SEXP x, SEXP data, double *nparams, int debuglevel, SEXP weights);
 double glik(SEXP x, double *nparams);
 double cglik(SEXP x, SEXP data, SEXP parents, double *nparams);
 double c_fast_ccgloglik(double *xx, double **gp, int ngp, int nobs, int *config,
@@ -58,9 +57,7 @@ double c_fast_ccgloglik(double *xx, double **gp, int ngp, int nobs, int *config,
 double loglik_gnode(SEXP target, SEXP x, SEXP data, double *nparams, int debuglevel);
 double loglik_cgnode(SEXP target, SEXP x, SEXP data, double *nparams, int debuglevel);
 double dirichlet_node(SEXP target, SEXP x, SEXP data, SEXP iss, int per_node,
-    SEXP prior, SEXP beta, SEXP experimental, int sparse, int debuglevel);
-double dirichlet_averaged_node(SEXP target, SEXP x, SEXP data, SEXP l,
-    SEXP prior, SEXP beta, int sparse, int debuglevel);
+    SEXP prior, SEXP beta, SEXP experimental, int sparse, int debuglevel, SEXP weights);
 double wishart_node(SEXP target, SEXP x, SEXP data, SEXP isize, SEXP phi,
     SEXP prior, SEXP beta, int debuglevel);
 

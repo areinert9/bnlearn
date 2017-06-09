@@ -1,22 +1,27 @@
 #include "include/rcore.h"
 
 /* initialize a one-dimensional contingency table. */
-void fill_1d_table(int *xx, int **n, int llx, int num) {
+void fill_1d_table(int *xx, int **n, int llx, int num, SEXP weights) {
 
+int *w;
+w = INTEGER(weights);
+  
 int i = 0;
 
   *n = Calloc1D(llx, sizeof(int));
 
   for (i = 0; i < num; i++)
-    (*n)[xx[i] - 1]++;
+    (*n)[xx[i] - 1]+= w[i];
 
 }/*FILL_1D_TABLE*/
 
 /* initialize a two-dimensional contingency table and the marginals. */
 void fill_2d_table(int *xx, int *yy, int ***n, int **ni, int **nj, int llx,
-    int lly, int num) {
+    int lly, int num, SEXP weights) {
 
 int i = 0, j = 0, k = 0;
+int *w;
+w = INTEGER(weights);
 
   *n = (int **) Calloc2D(llx, lly, sizeof(int));
   *ni = (int *) Calloc1D(llx, sizeof(int));
@@ -24,7 +29,7 @@ int i = 0, j = 0, k = 0;
 
   /* compute the joint frequency of x and y. */
   for (k = 0; k < num; k++)
-    (*n)[xx[k] - 1][yy[k] - 1]++;
+    (*n)[xx[k] - 1][yy[k] - 1]+= w[k];
 
   /* compute the marginals. */
   for (i = 0; i < llx; i++)
@@ -39,9 +44,11 @@ int i = 0, j = 0, k = 0;
 
 /* initialize a three-dimensional contingency table and the marginals. */
 void fill_3d_table(int *xx, int *yy, int *zz, int ****n, int ***ni, int ***nj,
-    int **nk, int llx, int lly, int llz, int num) {
+    int **nk, int llx, int lly, int llz, int num, SEXP weights) {
 
 int i = 0, j = 0, k = 0;
+  int *w;
+  w = INTEGER(weights);
 
   *n = (int ***) Calloc3D(llz, llx, lly, sizeof(int));
   *ni = (int **) Calloc2D(llz, llx, sizeof(int));
@@ -50,7 +57,7 @@ int i = 0, j = 0, k = 0;
 
   /* compute the joint frequency of x, y, and z. */
   for (k = 0; k < num; k++)
-    (*n)[zz[k] - 1][xx[k] - 1][yy[k] - 1]++;
+    (*n)[zz[k] - 1][xx[k] - 1][yy[k] - 1]+= w[k];
 
   /* compute the marginals. */
   for (i = 0; i < llx; i++)

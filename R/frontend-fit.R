@@ -22,6 +22,13 @@ bn.fit = function(x, data, cluster = NULL, method = "mle", ...,
   check.fitting.method(method, data)
   # check the extra arguments.
   extra.args = check.fitting.args(method, x, data, list(...))
+  
+  if(is.null(extra.args$weights)){
+    extra.args$weights <- as.integer(rep(1, nrow(data)))  
+  }else{
+    warning("Learing network with weigths")
+    extra.args$weights <- as.integer(extra.args$weights)
+  }  
   # check debug and keep.fitted.
   check.logical(debug)
   check.logical(keep.fitted)
@@ -43,6 +50,7 @@ bn.fit = function(x, data, cluster = NULL, method = "mle", ...,
 
   }#THEN
 
+  
   bn.fit.backend(x = x, data = data, cluster = cluster, method = method,
     extra.args = extra.args, keep.fitted = keep.fitted, debug = debug)
 

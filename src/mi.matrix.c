@@ -58,8 +58,11 @@ void mi_matrix(double *mim, void **columns, int dim, int *nlevels, int *num,
     void *cond, int *clevels, double *means, double *sse, int *est) {
 
 int i = 0, j = 0;
+int nobs_w;
+SEXP weights;
 
   switch(*est) {
+    
 
     case DISCRETE_MAXIMUM_LIKELIHOOD:
 
@@ -71,7 +74,7 @@ int i = 0, j = 0;
 
             mim[UPTRI3(i + 1, j + 1, dim)] =
               c_chisqtest(((int **)columns)[i], nlevels[i],
-                   ((int **)columns)[j], nlevels[j], *num, NULL, MI);
+                   ((int **)columns)[j], nlevels[j], *num, NULL, MI, weights, nobs_w); /*DUMMY*/
 
           }/*FOR*/
 
@@ -87,7 +90,7 @@ int i = 0, j = 0;
             mim[UPTRI3(i + 1, j + 1, dim)] =
               c_cchisqtest(((int **)columns)[i], nlevels[i],
                     ((int **)columns)[j], nlevels[j],
-                    (int *)cond, *clevels, *num, NULL, MI);
+                    (int *)cond, *clevels, *num, NULL, MI, weights, nobs_w); /*DUMMY*/
 
           }/*FOR*/
 

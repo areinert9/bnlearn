@@ -147,7 +147,7 @@
 /* parametric tests for discrete variables. */
 static SEXP ast_discrete(SEXP xx, SEXP yy, SEXP zz, SEXP ff, SEXP x, SEXP y,
     SEXP sx, SEXP fixed, int nobs, int nsx, int nf, int minsize, int maxsize,
-    test_e test, double a, int debuglevel) {
+    test_e test, double a, int debuglevel, SEXP weights) {
 
 int *xptr = INTEGER(xx), *yptr = INTEGER(yy), *zptr = NULL, *subset = NULL;
 int i = 0, cursize = 0, llx = NLEVELS(xx), lly = NLEVELS(yy), llz = 0;
@@ -155,6 +155,12 @@ int **column = NULL, *nlvls = NULL, **subcol = NULL, *sublvls = NULL;
 double statistic = 0, pvalue = 0, df = 0, min_pvalue = 1, max_pvalue = 0;
 
   DISCRETE_CACHE();
+  int nobs_w =0;
+  int *w;
+  w=INTEGER(weights);
+  for(i=0; i <nobs; i++){
+    nobs_w+=w[i];
+  }
 
   for (cursize = 1; cursize <= maxsize; cursize++) {
 
@@ -168,23 +174,23 @@ double statistic = 0, pvalue = 0, df = 0, min_pvalue = 1, max_pvalue = 0;
       if (test == MI || test == MI_ADF || test == X2 || test == X2_ADF) {
 
         /* mutual information and Pearson's X^2 asymptotic tests. */
-        statistic = c_cchisqtest(xptr, llx, yptr, lly, zptr, llz, nobs, &df, test);
+        statistic = c_cchisqtest(xptr, llx, yptr, lly, zptr, llz, nobs, &df, test, weights, nobs_w);
         if ((test == MI) || (test == MI_ADF))
-          statistic = 2 * nobs * statistic;
+          statistic = 2 * nobs_w * statistic;
         PVALUE(pchisq(statistic, df, FALSE, FALSE));
 
       }/*THEN*/
       else if (test == MI_SH) {
 
         /* shrinkage mutual information test. */
-        statistic = c_shcmi(xptr, llx, yptr, lly, zptr, llz, nobs, &df);
-        PVALUE(pchisq(2 * nobs * statistic, df, FALSE, FALSE));
+        statistic = c_shcmi(xptr, llx, yptr, lly, zptr, llz, nobs, &df, weights, nobs_w);
+        PVALUE(pchisq(2 * nobs_w * statistic, df, FALSE, FALSE));
 
       }/*THEN*/
       else if (test == JT) {
 
         /* Jonckheere-Terpstra test. */
-        statistic = c_cjt(xptr, llx, yptr, lly, zptr, llz, nobs);
+        statistic = c_cjt(xptr, llx, yptr, lly, zptr, llz, nobs, weights, nobs_w);
         PVALUE(2 * pnorm(fabs(statistic), 0, 1, FALSE, FALSE));
 
       }/*THEN*/
@@ -383,19 +389,22 @@ void *xptr = 0, *yptr = 0, **columns = NULL;
 
         /* check whether the conditioning set is valid. */
         if (ngp > 0) {
-
+          SEXP weights;
+          int nobs_w;
           /* need to reverse conditioning to actually compute the test. */
           statistic = 2 * nobs * nobs *
                         c_cmicg_unroll(xptr, llx, yptr, lly, zptr, llz,
-                                   gp + 1, ngp, &df, nobs);
+                                   gp + 1, ngp, &df, nobs, weights, nobs_w); /*DUMMY*/
 
         }/*THEN*/
         else {
-
+          
+          SEXP weights;
+          int nobs_w;
           /* if both nodes are discrete, the test reverts back to a discrete
            * mutual information test. */
           statistic = 2 * nobs * c_cchisqtest(xptr, llx, yptr, lly, zptr, llz,
-                                   nobs, &df, MI);
+                                   nobs, &df, MI, weights, nobs_w); /*DUMMY*/
 
         }/*ELSE*/
 
@@ -535,7 +544,7 @@ double statistic = 0, pvalue = 0, min_pvalue = 1, max_pvalue = 0;
 }/*AST_GPERM*/
 
 SEXP allsubs_test(SEXP x, SEXP y, SEXP sx, SEXP fixed, SEXP data, SEXP test,
-    SEXP B, SEXP alpha, SEXP min, SEXP max, SEXP debug) {
+    SEXP B, SEXP alpha, SEXP min, SEXP max, SEXP debug, SEXP weights) {
 
 int minsize = INT(min), maxsize = INT(max), debuglevel = isTRUE(debug), nobs = 0;
 int i = 0, *subset = NULL, cursize = 0, nsx = length(sx), nf = length(fixed);
@@ -547,7 +556,7 @@ SEXP xx, yy, zz, ff = R_NilValue, res = R_NilValue;
   /* call indep_test to deal with zero-length conditioning subsets. */
   if (minsize == 0) {
 
-    PVALUE(NUM(indep_test(x, y, fixed, data, test, B, alpha, TRUESEXP)));
+    PVALUE(NUM(indep_test(x, y, fixed, data, test, B, alpha, TRUESEXP, weights)));
     DEBUGGING();
 
   }/*THEN*/
@@ -564,7 +573,7 @@ SEXP xx, yy, zz, ff = R_NilValue, res = R_NilValue;
 
     /* parametric tests for discrete variables. */
     res = ast_discrete(xx, yy, zz, ff, x, y, sx, fixed, nobs, nsx, nf, minsize,
-            maxsize, test_type, a, debuglevel);
+            maxsize, test_type, a, debuglevel, weights);
 
   }/*THEN*/
   else if ((test_type == COR) || (test_type == ZF) || (test_type == MI_G) ||

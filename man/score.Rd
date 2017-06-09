@@ -109,8 +109,8 @@ score(x, data, type = NULL, ..., by.node = FALSE, debug = FALSE)
 \references{
 
   Castelo R, Siebes A (2000). "Priors on Network Structures. Biasing the Search
-      for Bayesian Networks". \emph{International Journal of Approximate
-      Reasoning}, \strong{24}(1), 39-57.
+      for Bayesian Networks". International Journal of Approximate Reasoning,
+      \strong{24}(1), 39-57.
 
   Chickering DM (1995). "A Transformational Characterization of Equivalent
       Bayesian Network Structures". In "UAI '95: Proceedings of the Eleventh
@@ -137,16 +137,10 @@ score(x, data, type = NULL, ..., by.node = FALSE, debug = FALSE)
       \strong{20}(3), 197-243. Available as Technical Report MSR-TR-94-09.
 
   Suzuki J (2016). "A Theoretical Analysis of the BDeu Scores in Bayesian
-      Network Structure Learning". \emph{Behaviormetrika}, \strong{44}(1),
-      97-116. 
+    Network Structure Learning". Behaviormetrika.
 
   Scutari M (2016). "An Empirical-Bayes Score for Discrete Bayesian Networks".
-      \emph{Journal of Machine Learning Research}, \strong{52}, 438-448.
-
-  Cano A and Gomez-Olmedo M and Masegosa AR and Moral S (2013). "Locally
-      Averaged Bayesian Dirichlet Metrics for Learning the Structure and the
-      Parameters of Bayesian Networks". \emph{International Journal of
-      Approximate Reasoning}, \strong{54}, 526-540.
+    \emph{Journal of Machine Learning Research}, \strong{52}, 438-448.
 
 }
 \value{

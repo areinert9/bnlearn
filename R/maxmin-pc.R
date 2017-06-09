@@ -1,6 +1,6 @@
 
 maxmin.pc.optimized = function(x, whitelist, blacklist, test,
-  alpha, B, strict, debug = FALSE) {
+  alpha, B, strict, debug = FALSE, weights) {
 
   nodes = names(x)
   mb = list()
@@ -13,12 +13,12 @@ maxmin.pc.optimized = function(x, whitelist, blacklist, test,
     mb[[node]] = maxmin.pc.forward.phase(node, data = x, nodes = nodes,
          alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
          backtracking = backtracking, test = test, optimized = TRUE,
-         debug = debug)
+         debug = debug, weights = weights)
 
     # 2. [Backward Phase (II)]
     mb[[node]] = neighbour(node, mb = mb, data = x, alpha = alpha,
          B = B, whitelist = whitelist, blacklist = blacklist,
-         backtracking = backtracking, test = test, markov = FALSE, debug = debug)
+         backtracking = backtracking, test = test, markov = FALSE, debug = debug, weights = weights)
 
   }#FOR
 
@@ -35,20 +35,20 @@ maxmin.pc.optimized = function(x, whitelist, blacklist, test,
 }#MAXMIN.PC.OPTIMIZED
 
 maxmin.pc = function(x, cluster = NULL, whitelist, blacklist, test, alpha, B,
-  strict, debug = FALSE) {
+  strict, debug = FALSE, weights) {
 
   nodes = names(x)
 
   # 1. [Forward Phase (I)]
   mb = smartSapply(cluster, as.list(nodes), maxmin.pc.forward.phase, data = x,
          nodes = nodes, alpha = alpha, B = B, whitelist = whitelist,
-         blacklist = blacklist, test = test, optimized = FALSE, debug = debug)
+         blacklist = blacklist, test = test, optimized = FALSE, debug = debug, weights = weights)
   names(mb) = nodes
 
   # 2. [Backward Phase (II)]
   mb = smartSapply(cluster, as.list(nodes), neighbour, mb = mb, data = x,
          alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
-         test = test, markov = FALSE, debug = debug)
+         test = test, markov = FALSE, debug = debug, weights = weights)
   names(mb) = nodes
 
   # make up a set of believable Markov blankets, using all the nodes within
@@ -64,7 +64,7 @@ maxmin.pc = function(x, cluster = NULL, whitelist, blacklist, test, alpha, B,
 }#MAXMIN.PC
 
 maxmin.pc.forward.phase = function(x, data, nodes, alpha, B, whitelist,
-  blacklist, backtracking = NULL, test, optimized = TRUE, debug = FALSE) {
+  blacklist, backtracking = NULL, test, optimized = TRUE, debug = FALSE, weights) {
 
   nodes = nodes[nodes != x]
   known.good = known.bad = c()
@@ -125,7 +125,7 @@ maxmin.pc.forward.phase = function(x, data, nodes, alpha, B, whitelist,
     # get an association measure for each of the available nodes.
     association = sapply(to.be.checked, maxmin.pc.heuristic.optimized, y = x,
                     sx = cpc, data = data, test = test, alpha = alpha, B = B,
-                    association = association, debug = debug)
+                    association = association, debug = debug, weights = weights)
 
     # stop if there are no candidates for inclusion.
     if (all(association > alpha) || length(nodes) == 0 || is.null(nodes)) break
@@ -154,7 +154,7 @@ maxmin.pc.forward.phase = function(x, data, nodes, alpha, B, whitelist,
 }#MAXMIN.PC.FORWARD.PHASE
 
 maxmin.pc.heuristic.optimized = function(x, y, sx, data, test, alpha, B,
-    association, debug = FALSE) {
+    association, debug = FALSE, weights) {
 
   min.assoc = association[x]
 
@@ -171,7 +171,7 @@ maxmin.pc.heuristic.optimized = function(x, y, sx, data, test, alpha, B,
   sx = sx[-length(sx)]
 
   new.min.assoc = allsubs.test(x = x, y = y, sx = sx, fixed = last, data = data,
-                    test = test, B = B, alpha = alpha, debug = debug)[3]
+                    test = test, B = B, alpha = alpha, debug = debug, weights = weights)[3]
 
   min.assoc = max(min.assoc, new.min.assoc)
 

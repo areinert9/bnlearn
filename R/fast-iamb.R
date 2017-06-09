@@ -1,6 +1,6 @@
 
 fast.incremental.association.optimized = function(x, whitelist, blacklist,
-  test, alpha, B, strict, debug = FALSE) {
+  test, alpha, B, strict, debug = FALSE, weights) {
 
   nodes = names(x)
   mb2 = mb = list()
@@ -12,7 +12,7 @@ fast.incremental.association.optimized = function(x, whitelist, blacklist,
 
     mb[[node]] = fast.ia.markov.blanket(node, data = x, nodes = nodes,
          alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
-         backtracking = backtracking, test = test, debug = debug)
+         backtracking = backtracking, test = test, debug = debug, weights = weights)
 
   }#FOR
 
@@ -27,7 +27,7 @@ fast.incremental.association.optimized = function(x, whitelist, blacklist,
     # save results in a copy of mb.
     mb2[[node]] = neighbour(node, mb = mb, data = x, alpha = alpha,
          B = B, whitelist = whitelist, blacklist = blacklist,
-         backtracking = backtracking, test = test, debug = debug)
+         backtracking = backtracking, test = test, debug = debug, weights = weights)
 
   }#FOR
 
@@ -42,14 +42,14 @@ fast.incremental.association.optimized = function(x, whitelist, blacklist,
 }#FAST.INCREMENTAL.ASSOCIATION.OPTIMIZED
 
 fast.incremental.association = function(x, cluster = NULL, whitelist,
-  blacklist, test, alpha, B, strict, debug = FALSE) {
+  blacklist, test, alpha, B, strict, debug = FALSE, weights) {
 
   nodes = names(x)
 
   # 1. [Compute Markov Blankets]
   mb = smartSapply(cluster, as.list(nodes), fast.ia.markov.blanket,
          data = x, nodes = nodes, alpha = alpha, B = B, whitelist = whitelist,
-         blacklist = blacklist, test = test, debug = debug)
+         blacklist = blacklist, test = test, debug = debug, weights = weights)
   names(mb) = nodes
 
   # check markov blankets for consistency.
@@ -58,7 +58,7 @@ fast.incremental.association = function(x, cluster = NULL, whitelist,
   # 2. [Compute Graph Structure]
   mb = smartSapply(cluster, as.list(nodes), neighbour, mb = mb, data = x,
          alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
-         test = test, debug = debug)
+         test = test, debug = debug, weights = weights)
   names(mb) = nodes
 
   # check neighbourhood sets for consistency.
@@ -69,7 +69,7 @@ fast.incremental.association = function(x, cluster = NULL, whitelist,
 }#FAST.INCREMENTAL.ASSOCIATION
 
 fast.ia.markov.blanket = function(x, data, nodes, alpha, B, whitelist, blacklist,
-  start = character(0), backtracking = NULL, test, debug = FALSE) {
+  start = character(0), backtracking = NULL, test, debug = FALSE, weights) {
 
   nodes = nodes[nodes != x]
   known.good = known.bad = c()
@@ -132,7 +132,7 @@ fast.ia.markov.blanket = function(x, data, nodes, alpha, B, whitelist, blacklist
 
     # get an association measure for each of the available nodes.
     association = indep.test(nodes[nodes %!in% mb], x, sx = mb, test = test,
-                    data = data, B = B, alpha = alpha)
+                    data = data, B = B, alpha = alpha, weights = weights)
 
     if (debug) {
 
@@ -151,7 +151,7 @@ fast.ia.markov.blanket = function(x, data, nodes, alpha, B, whitelist, blacklist
 
     for (node in names(association)) {
 
-      opc = obs.per.cell(x, node, mb, data)
+      opc = obs.per.cell(x, node, mb, data, weights = weights)
 
       if ((test %!in% asymptotic.tests) || (opc >= 5)) {
 
@@ -203,7 +203,7 @@ fast.ia.markov.blanket = function(x, data, nodes, alpha, B, whitelist, blacklist
     fixed = whitelisted[whitelisted != ""]
 
     pv = roundrobin.test(x = x, z = mb, fixed = fixed, data = data, test = test,
-           B = B, alpha = alpha, debug = debug)
+           B = B, alpha = alpha, debug = debug, weights = weights)
 
     mb = intersect(mb, c(names(pv[pv < alpha]), fixed))
 

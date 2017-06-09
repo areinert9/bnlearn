@@ -3,12 +3,13 @@
 #include "include/dataframe.h"
 #include "include/scores.h"
 
-/* posterior Dirichlet probability (covers BD and K2 scores). */
-double dpost(SEXP x, SEXP iss, int per_cell, SEXP exp) {
+/* posterior Dirichlet probability (covers BDe and K2 scores). */
+double dpost(SEXP x, SEXP iss, int per_cell, SEXP exp, SEXP weights) {
 
 int i = 0, k = 0, num = length(x);
-int llx = NLEVELS(x), *xx = INTEGER(x), *n = NULL;
+int llx = NLEVELS(x), *xx = INTEGER(x), *n = NULL, *w;
 double imaginary = 0, alpha = 0, res = 0;
+w = INTEGER(weights);
 
   /* the correct vaules for the hyperparameters alpha are documented in
    * "Learning Bayesian Networks: The Combination of Knowledge and Statistical
@@ -37,7 +38,7 @@ double imaginary = 0, alpha = 0, res = 0;
   if (exp == R_NilValue) {
 
     for (i = 0; i < num; i++)
-      n[xx[i] - 1]++;
+      n[xx[i] - 1] += w[i];
 
   }/*THEN*/
   else {
@@ -46,7 +47,7 @@ double imaginary = 0, alpha = 0, res = 0;
 
     for (i = 0, k = 0; i < num; i++) {
       if (i != e[k] - 1)
-        n[xx[i] - 1]++;
+        n[xx[i] - 1]+= w[i];
       else
         k++;
 
@@ -56,11 +57,16 @@ double imaginary = 0, alpha = 0, res = 0;
    num -= length(exp);
 
   }/*ELSE*/
-
+  
+  int s;
+  s = 0;
+  for (i = 0; i < num; i++){
+    s += w[i];
+  }
   /* compute the posterior probability. */
   for (i = 0; i < llx; i++)
     res += lgammafn(n[i] + alpha) - lgammafn(alpha);
-  res += lgammafn(imaginary) - lgammafn(imaginary + num);
+  res += lgammafn(imaginary) - lgammafn(imaginary + s);
 
   Free1D(n);
 
@@ -68,13 +74,14 @@ double imaginary = 0, alpha = 0, res = 0;
 
 }/*DPOST*/
 
-/* conditional posterior Dirichlet probability (covers BD and K2 scores). */
-double cdpost(SEXP x, SEXP y, SEXP iss, int per_cell, SEXP exp) {
+/* conditional posterior Dirichlet probability (covers BDe and K2 scores). */
+double cdpost(SEXP x, SEXP y, SEXP iss, int per_cell, SEXP exp, SEXP weights) {
 
 int i = 0, j = 0, k = 0, num = length(x);
 int llx = NLEVELS(x), lly = NLEVELS(y), p = llx * lly;
-int *xx = INTEGER(x), *yy = INTEGER(y), **n = NULL, *nj = NULL;
+int *xx = INTEGER(x), *yy = INTEGER(y), **n = NULL, *nj = NULL, *w;
 double imaginary = 0, alpha = 0, res = 0;
+w = INTEGER(weights);
 
   if (per_cell) {
 
@@ -100,9 +107,8 @@ double imaginary = 0, alpha = 0, res = 0;
   if (exp == R_NilValue) {
 
     for (i = 0; i < num; i++) {
-
-      n[xx[i] - 1][yy[i] - 1]++;
-      nj[yy[i] - 1]++;
+      n[xx[i] - 1][yy[i] - 1] += w[i];
+      nj[yy[i] - 1] += w[i];
 
     }/*FOR*/
 
@@ -115,8 +121,8 @@ double imaginary = 0, alpha = 0, res = 0;
 
       if (i != e[k] - 1) {
 
-        n[xx[i] - 1][yy[i] - 1]++;
-        nj[yy[i] - 1]++;
+        n[xx[i] - 1][yy[i] - 1]+= w[i];
+        nj[yy[i] - 1]+= w[i];
 
       }/*THEN*/
       else {
@@ -146,9 +152,9 @@ double imaginary = 0, alpha = 0, res = 0;
 
 }/*CDPOST*/
 
-/* Dirichlet posterior probabilities (covers BD and K2 scores). */
+/* Dirichlet posterior probabilities (covers BDe and K2 scores). */
 double dirichlet_node(SEXP target, SEXP x, SEXP data, SEXP iss, int per_cell,
-    SEXP prior, SEXP beta, SEXP experimental, int sparse, int debuglevel) {
+    SEXP prior, SEXP beta, SEXP experimental, int sparse, int debuglevel, SEXP weights) {
 
 char *t = (char *)CHAR(STRING_ELT(target, 0));
 double prob = 0, prior_prob = 0;
@@ -168,7 +174,7 @@ SEXP nodes, node_t, data_t, exp_data, parents, parent_vars, config;
 
   if (length(parents) == 0) {
 
-    prob = dpost(data_t, iss, per_cell, exp_data);
+    prob = dpost(data_t, iss, per_cell, exp_data, weights);
 
   }/*THEN*/
   else {
@@ -177,7 +183,7 @@ SEXP nodes, node_t, data_t, exp_data, parents, parent_vars, config;
     PROTECT(parent_vars = c_dataframe_column(data, parents, FALSE, FALSE));
     PROTECT(config = c_configurations(parent_vars, TRUE, !sparse));
     /* compute the marginal likelihood. */
-    prob = cdpost(data_t, config, iss, per_cell, exp_data);
+    prob = cdpost(data_t, config, iss, per_cell, exp_data, weights);
 
     UNPROTECT(2);
 

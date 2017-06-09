@@ -16,8 +16,8 @@
 
     Package: \tab bnlearn\cr
     Type: \tab Package\cr
-    Version: \tab 4.2-20170530\cr
-    Date: \tab 2017-05-30\cr
+    Version: \tab 4.2-20170416\cr
+    Date: \tab 2017-04-16\cr
     License: \tab GPLv2 or later
 
   }
@@ -282,8 +282,6 @@
         \item the logarithm of the modified \emph{Bayesian Dirichlet equivalent}
           score (\code{mbde}) for mixtures of experimental and observational
           data (not score equivalent).
-        \item the logarithm of the \emph{locally averaged Bayesian Dirichlet}
-          score (\code{bdla}, not score equivalent).
         \item the logarithm of the \emph{K2} score (\code{k2}), a Dirichlet
           posterior density (not score equivalent).
 

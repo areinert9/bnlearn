@@ -52,23 +52,23 @@ SEXP c_create_htest(double stat, SEXP test, double pvalue, double df, SEXP B);
 
 /* from indep.test.c */
 SEXP indep_test(SEXP x, SEXP y, SEXP sx, SEXP data, SEXP test, SEXP B,
-    SEXP alpha, SEXP learning);
+    SEXP alpha, SEXP learning, SEXP weights);
 
 /* conditional independence tests. */
 SEXP utest(SEXP x, SEXP y, SEXP data, SEXP test, SEXP B, SEXP alpha,
-    SEXP learning);
+    SEXP learning, SEXP weights);
 SEXP ctest(SEXP x, SEXP y, SEXP sx, SEXP data, SEXP test, SEXP B, SEXP alpha,
-    SEXP learning);
+    SEXP learning, SEXP weights);
 
 /* from discrete.tests.c */
 double c_chisqtest(int *xx, int llx, int *yy, int lly, int num, double *df,
-    test_e test);
+    test_e test, SEXP weights, int nobs_w);
 double mi_kernel(int **n, int *nrowt, int *ncolt, int nrow, int ncol,
     int length);
 double x2_kernel(int **n, int *nrowt, int *ncolt, int nrow, int ncol,
     int length);
 double c_cchisqtest(int *xx, int llx, int *yy, int lly, int *zz, int llz,
-    int num, double *df, test_e test);
+    int num, double *df, test_e test, SEXP weights, int nobs_w);
 double cmi_kernel(int ***n, int **nrowt, int **ncolt, int *ncond, int nr,
     int nc, int nl);
 double cx2_kernel(int ***n, int **nrowt, int **ncolt, int *ncond,
@@ -84,7 +84,7 @@ double c_micg(double *yy, double ym, double ysd, int *xx, int llx, int num);
 double c_cmicg(double *yy, double **xx, int nx, int **zz, int nz, int *z0,
     int nz0, int *nlvls, int num);
 double c_cmicg_unroll(int *xx, int llx, int *yy, int lly, int *zz, int llz,
-    double **gp, int ngp, double *df, int num);
+    double **gp, int ngp, double *df, int num, SEXP weights, int nobs_w);
 
 /* from df.adjust.c */
 double df_adjust(int *ni, int llx, int *nj, int lly);
@@ -93,24 +93,24 @@ double cdf_adjust(int **ni, int llx, int **nj, int lly, int llz);
 /* from jonckheere.c */
 double c_jt_mean(int num, int *ni, int llx);
 double c_jt_var(int num, int *ni, int llx, int *nj, int lly);
-double c_jt(int *xx, int llx, int *yy, int lly, int num);
-double c_cjt(int *xx, int llx, int *yy, int lly, int *zz, int llz, int num);
+double c_jt(int *xx, int llx, int *yy, int lly, int num, SEXP weights, int nobs_w);
+double c_cjt(int *xx, int llx, int *yy, int lly, int *zz, int llz, int num, SEXP weights, int nobs_w);
 
 /* from shrinkage.c */
 void mi_lambda(double *n, double *lambda, double target, int num, int llx,
-    int lly, int llz);
+    int lly, int llz, int nobs_w);
 double cor_lambda(double *xx, double *yy, int nobs, double xm, double ym,
    double xsd, double ysd, double cor);
-double c_shmi(int *xx, int llx, int *yy, int lly, int num);
+double c_shmi(int *xx, int llx, int *yy, int lly, int num, SEXP weights, int nobs_w);
 double c_shcmi(int *xx, int llx, int *yy, int lly, int *zz, int llz,
-    int num, double *df);
+    int num, double *df, SEXP weights, int nobs_w);
 double covmat_lambda(double **column, double *mean, double *var, int n,
     int ncol);
 void covmat_shrink(double *var, int ncol, double lambda);
 
 /* from {discrete,gaussian}.monte.carlo.c */
 void c_mcarlo(int *xx, int nr, int *yy, int nc, int num, int B,
-    double *observed, double *pvalue, double alpha, test_e test, double *df);
+    double *observed, double *pvalue, double alpha, test_e test, double *df, SEXP weights);
 void c_cmcarlo(int *xx, int nr, int *yy, int nc, int *zz, int nl, int num,
     int B, double *observed, double *pvalue, double alpha, test_e test, double *df);
 void c_gauss_mcarlo(double *xx, double *yy, int num, int B, double *res,
@@ -119,9 +119,9 @@ void c_gauss_cmcarlo(double **column, int ncol, int num, int B,
     double *observed, double *pvalue, double alpha, test_e test);
 
 /* from contingency.tables.c */
-void fill_1d_table(int *xx, int **n, int llx, int num);
+void fill_1d_table(int *xx, int **n, int llx, int num, SEXP weights);
 void fill_2d_table(int *xx, int *yy, int ***n, int **ni, int **nj, int llx,
-    int lly, int num);
+    int lly, int num, SEXP weights);
 void fill_3d_table(int *xx, int *yy, int *zz, int ****n, int ***ni, int ***nj,
-    int **nk, int llx, int lly, int llz, int num);
+    int **nk, int llx, int lly, int llz, int num, SEXP weights);
 

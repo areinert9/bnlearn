@@ -205,9 +205,9 @@ reverse.arc.backend = function(from, to, arcs, debug = FALSE) {
 }#REVERSE.ARC.BACKEND
 
 # which arcs are {white,black}listed?
-which.listed = function(arcs, list, either = FALSE, both = FALSE) {
+which.listed = function(arcs, list) {
 
-  apply(arcs, 1, function(arc) { is.listed(list, arc, either, both) })
+  apply(arcs, 1, function(arc) { is.listed(list, arc) })
 
 }#WHICH.LISTED
 

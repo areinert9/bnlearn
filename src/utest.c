@@ -16,7 +16,7 @@
 
 /* parametric tests for discrete variables. */
 static double ut_discrete(SEXP xx, SEXP yy, int nobs, int ntests,
-    double *pvalue, double *df, test_e test) {
+    double *pvalue, double *df, test_e test, SEXP weights, int nobs_w) {
 
 int i = 0, llx = 0, lly = NLEVELS(yy), *xptr = NULL, *yptr = INTEGER(yy);
 double statistic = 0;
@@ -29,16 +29,16 @@ SEXP xdata;
     if (test == MI || test == MI_ADF || test == X2 || test == X2_ADF) {
 
       /* mutual information and Pearson's X^2 asymptotic tests. */
-      statistic = c_chisqtest(xptr, llx, yptr, lly, nobs, df, test);
+      statistic = c_chisqtest(xptr, llx, yptr, lly, nobs, df, test, weights, nobs_w);
       if ((test == MI) || (test == MI_ADF))
-        statistic = 2 * nobs * statistic;
+        statistic = 2 * nobs_w * statistic;
       pvalue[i] = pchisq(statistic, *df, FALSE, FALSE);
 
     }/*THEN*/
     else if (test == MI_SH) {
 
       /* shrinkage mutual information test. */
-      statistic = 2 * nobs * c_shmi(xptr, llx, yptr, lly, nobs);
+      statistic = 2 * nobs_w * c_shmi(xptr, llx, yptr, lly, nobs, weights, nobs_w);
       *df = ((double)(llx - 1) * (double)(lly - 1));
       pvalue[i] = pchisq(statistic, *df, FALSE, FALSE);
 
@@ -46,7 +46,7 @@ SEXP xdata;
     else if (test == JT) {
 
       /* Jonckheere-Terpstra test. */
-      statistic = c_jt(xptr, llx, yptr, lly, nobs);
+      statistic = c_jt(xptr, llx, yptr, lly, nobs, weights, nobs_w);
       pvalue[i] = 2 * pnorm(fabs(statistic), 0, 1, FALSE, FALSE);
 
     }/*THEN*/
@@ -163,7 +163,9 @@ SEXP xdata;
       xptr = INTEGER(xdata);
       llx = NLEVELS(xdata);
       DISCRETE_SWAP_X();
-      statistic = 2 * nobs * c_chisqtest(xptr, llx, yptr, lly, nobs, df, MI);
+      int nobs_w;
+      SEXP weights;
+      statistic = 2 * nobs * c_chisqtest(xptr, llx, yptr, lly, nobs, df, MI, weights, nobs_w); /* DUMMY */
       pvalue[i] = pchisq(statistic, *df, FALSE, FALSE);
 
     }/*THEN*/
@@ -213,7 +215,7 @@ SEXP xdata;
 
 /* discrete permutation tests. */
 static double ut_dperm(SEXP xx, SEXP yy, int nobs, int ntests, double *pvalue,
-    double *df, test_e type, int B, double a) {
+    double *df, test_e type, int B, double a, SEXP weights) {
 
 int i = 0, *xptr = NULL, *yptr = INTEGER(yy);
 int llx = 0, lly = NLEVELS(yy);
@@ -225,7 +227,7 @@ SEXP xdata;
     DISCRETE_SWAP_X();
     statistic = 0;
     c_mcarlo(xptr, llx, yptr, lly, nobs, B, &statistic, pvalue + i,
-      a, type, df);
+      a, type, df, weights);
 
   }/*FOR*/
 
@@ -254,7 +256,7 @@ double *yptr = REAL(yy), statistic = 0;
 
 /* unconditional independence tests. */
 SEXP utest(SEXP x, SEXP y, SEXP data, SEXP test, SEXP B, SEXP alpha,
-    SEXP learning) {
+    SEXP learning, SEXP weights) {
 
 int ntests = length(x), nobs = 0;
 double *pvalue = NULL, statistic = 0, df = NA_REAL;
@@ -275,9 +277,15 @@ SEXP xx, yy, result;
   nobs = length(yy);
 
   if (IS_DISCRETE_ASYMPTOTIC_TEST(test_type)) {
+    int nobs_w, *w;
+    w = INTEGER(weights);
+    nobs_w=0;
+    for(int i =0; i<nobs; i++){
+      nobs_w += w[i];
+    }
 
     /* parametric tests for discrete variables. */
-    statistic = ut_discrete(xx, yy, nobs, ntests, pvalue, &df, test_type);
+    statistic = ut_discrete(xx, yy, nobs, ntests, pvalue, &df, test_type, weights, nobs_w);
 
   }/*THEN*/
   else if ((test_type == COR) || (test_type == ZF) || (test_type == MI_G) ||
@@ -296,7 +304,7 @@ SEXP xx, yy, result;
   else if (IS_DISCRETE_PERMUTATION_TEST(test_type)) {
 
     statistic = ut_dperm(xx, yy, nobs, ntests, pvalue, &df, test_type, INT(B),
-                  IS_SMC(test_type) ? NUM(alpha) : 1);
+                  IS_SMC(test_type) ? NUM(alpha) : 1, weights);
 
   }/*THEN*/
   else if (IS_CONTINUOUS_PERMUTATION_TEST(test_type)) {

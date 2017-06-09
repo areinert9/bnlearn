@@ -11,7 +11,7 @@
     lambda = 0;
 
 /* shrinked mutual information, to be used in C code. */
-double c_shmi(int *xx, int llx, int *yy, int lly, int num) {
+double c_shmi(int *xx, int llx, int *yy, int lly, int num, SEXP weights, int nobs_w) {
 
 int i = 0, j = 0, k = 0;
 double **n = NULL, *ni = NULL, *nj = NULL;
@@ -22,18 +22,20 @@ double res = 0;
   n = (double **) Calloc2D(llx, lly, sizeof(double));
   ni = Calloc1D(llx, sizeof(double));
   nj = Calloc1D(lly, sizeof(double));
-
+  
+  int *w;
+  w = INTEGER(weights);
   /* compute the joint frequency of x and y. */
   for (k = 0; k < num; k++)
-    n[xx[k] - 1][yy[k] - 1]++;
+    n[xx[k] - 1][yy[k] - 1]+= w[k];
 
   /* estimate the optimal lambda for the data. */
-  mi_lambda((double *)n, &lambda, target, num, llx, lly, 0);
+  mi_lambda((double *)n, &lambda, target, num, llx, lly, 0, nobs_w);
 
   /* switch to the probability scale and shrink the estimates. */
   for (i = 0; i < llx; i++)
     for (j = 0; j < lly; j++)
-        n[i][j] = lambda * target + (1 - lambda) * n[i][j] / num;
+        n[i][j] = lambda * target + (1 - lambda) * n[i][j] / nobs_w;
 
   /* compute the marginals. */
   for (i = 0; i < llx; i++)
@@ -60,7 +62,7 @@ double res = 0;
 
 /* shrinked conditional mutual information, to be used in C code. */
 double c_shcmi(int *xx, int llx, int *yy, int lly, int *zz, int llz,
-    int num, double *df) {
+    int num, double *df, SEXP weights, int nobs_w) {
 
 int i = 0, j = 0, k = 0;
 double ***n = NULL, **ni = NULL, **nj = NULL, *nk = NULL;
@@ -77,17 +79,20 @@ double res = 0;
   nk = Calloc1D(llz, sizeof(double));
 
   /* compute the joint frequency of x, y, and z. */
+  int *w;
+  w = INTEGER(weights);
+  
   for (k = 0; k < num; k++)
-    n[xx[k] - 1][yy[k] - 1][zz[k] - 1]++;
+    n[xx[k] - 1][yy[k] - 1][zz[k] - 1]+=w[k];
 
   /* estimate the optimal lambda for the data. */
-  mi_lambda((double *)n, &lambda, target, num, llx, lly, llz);
+  mi_lambda((double *)n, &lambda, target, num, llx, lly, llz, nobs_w);
 
   /* switch to the probability scale and shrink the estimates. */
   for (i = 0; i < llx; i++)
     for (j = 0; j < lly; j++)
       for (k = 0; k < llz; k++)
-        n[i][j][k] = lambda * target + (1 - lambda) * n[i][j][k] / num;
+        n[i][j][k] = lambda * target + (1 - lambda) * n[i][j][k] / nobs_w;
 
   /* compute the marginals. */
   for (i = 0; i < llx; i++)
@@ -131,7 +136,7 @@ double res = 0;
 
 /* compute the shrinkage intensity lambda for the mutual information. */
 void mi_lambda(double *n, double *lambda, double target, int num, int llx,
-    int lly, int llz) {
+    int lly, int llz, int nobs_w) {
 
 double lden = 0, lnum = 0, temp = 0;
 
@@ -142,9 +147,9 @@ double lden = 0, lnum = 0, temp = 0;
     for (int i = 0; i < llx; i++)
       for (int j = 0; j < lly; j++) {
 
-        temp = ((double **)n)[i][j] / (double)(num);
+        temp = ((double **)n)[i][j] / (double)(nobs_w);
         lnum += temp * temp;
-        temp = target - ((double **)n)[i][j] / (double)(num);
+        temp = target - ((double **)n)[i][j] / (double)(nobs_w);
         lden += temp * temp;
 
       }/*FOR*/
@@ -156,9 +161,9 @@ double lden = 0, lnum = 0, temp = 0;
       for (int j = 0; j < lly; j++)
         for (int k = 0; k < llz; k++) {
 
-          temp = ((double ***)n)[i][j][k] / (double)(num);
+          temp = ((double ***)n)[i][j][k] / (double)(nobs_w);
           lnum += temp * temp;
-          temp = target - ((double ***)n)[i][j][k] / (double)(num);
+          temp = target - ((double ***)n)[i][j][k] / (double)(nobs_w);
           lden += temp * temp;
 
       }/*FOR*/
@@ -169,7 +174,7 @@ double lden = 0, lnum = 0, temp = 0;
   if (lden == 0)
     *lambda = 1;
   else
-    *lambda = (1 - lnum) / ((double)(num - 1) * lden);
+    *lambda = (1 - lnum) / ((double)(nobs_w - 1) * lden);
 
   /* bound the shrinkage intensity in the [0,1] interval. */
   TRUNCATE_LAMBDA(*lambda);

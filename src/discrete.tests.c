@@ -7,21 +7,28 @@
     (((double)(xmarg)) * ((double)(ymarg)))))
 
 /* unconditional mutual information, to be used for the asymptotic test. */
-SEXP mi(SEXP x, SEXP y, SEXP gsquare, SEXP adjusted) {
+SEXP mi(SEXP x, SEXP y, SEXP gsquare, SEXP adjusted, SEXP weights) {
 
 int llx = NLEVELS(x), lly = NLEVELS(y), num = length(x);
 int *xx = INTEGER(x), *yy = INTEGER(y);
 double *res = NULL;
 SEXP result;
-
+  
+  int nobs_w = 0, i=0;
+  int *w;
+  w = INTEGER(weights);
+  for(i=0; i <num; i++){
+    nobs_w += w[i];
+  }
   PROTECT(result = allocVector(REALSXP, 2));
   res = REAL(result);
   if (isTRUE(adjusted))
-    res[0] = c_chisqtest(xx, llx, yy, lly, num, res + 1, MI_ADF);
+    res[0] = c_chisqtest(xx, llx, yy, lly, num, res + 1, MI_ADF, weights, nobs_w);
   else
-    res[0] = c_chisqtest(xx, llx, yy, lly, num, res + 1, MI);
+    res[0] = c_chisqtest(xx, llx, yy, lly, num, res + 1, MI, weights, nobs_w);
 
   /* rescale to match the G^2 test. */
+  
   if (isTRUE(gsquare))
     res[0] *= 2 * num;
 
@@ -33,7 +40,7 @@ SEXP result;
 
 /* unconditional parametric asymptotic tests for categorical data. */
 double c_chisqtest(int *xx, int llx, int *yy, int lly, int num, double *df,
-    test_e test) {
+    test_e test, SEXP weights, int nobs_w) {
 
 int  **n = NULL, *ni = NULL, *nj = NULL, adj = IS_ADF(test);
 double res = 0;
@@ -42,7 +49,7 @@ double res = 0;
 
     /* if there are less than 5 observations per cell on average, assume the
      * test does not have enough power and return independence. */
-    if (num < 5 * llx * lly) {
+    if (nobs_w < 5 * llx * lly) {
 
       if (df) *df = 1;
 
@@ -53,12 +60,12 @@ double res = 0;
   }/*THEN*/
 
   /* initialize the contingency table and the marginal frequencies. */
-  fill_2d_table(xx, yy, &n, &ni, &nj, llx, lly, num);
+  fill_2d_table(xx, yy, &n, &ni, &nj, llx, lly, num, weights);
   /* compute the mutual information or Pearson's X^2. */
   if ((test == MI) || (test == MI_ADF))
-    res = mi_kernel(n, ni, nj, llx, lly, num) / num;
+    res = mi_kernel(n, ni, nj, llx, lly, nobs_w) / nobs_w;
   else if ((test == X2) || (test == X2_ADF))
-    res = x2_kernel(n, ni, nj, llx, lly, num);
+    res = x2_kernel(n, ni, nj, llx, lly, nobs_w);
 
   /* compute the degrees of freedom. */
   if (df)
@@ -74,7 +81,7 @@ double res = 0;
 
 /* conditional mutual information, to be used in C code. */
 double c_cchisqtest(int *xx, int llx, int *yy, int lly, int *zz, int llz,
-    int num, double *df, test_e test) {
+    int num, double *df, test_e test, SEXP weights, int nobs_w) {
 
 int ***n = NULL, **ni = NULL, **nj = NULL, *nk = NULL, adj = IS_ADF(test);
 double res = 0;
@@ -83,7 +90,7 @@ double res = 0;
 
     /* if there are less than 5 observations per cell on average, asuume the
      * test does not have enough power and return independence. */
-    if (num < 5 * llx * lly * llz) {
+    if (nobs_w < 5 * llx * lly * llz) {
 
       if (df) *df = 1;
 
@@ -94,10 +101,10 @@ double res = 0;
   }/*THEN*/
 
   /* initialize the contingency table and the marginal frequencies. */
-  fill_3d_table(xx, yy, zz, &n, &ni, &nj, &nk, llx, lly, llz, num);
+  fill_3d_table(xx, yy, zz, &n, &ni, &nj, &nk, llx, lly, llz, num, weights);
   /* compute the conditional mutual information or Pearson's X^2. */
   if ((test == MI) || (test == MI_ADF))
-    res = cmi_kernel(n, ni, nj, nk, llx, lly, llz) / num;
+    res = cmi_kernel(n, ni, nj, nk, llx, lly, llz) / nobs_w;
   else if ((test == X2) || (test == X2_ADF))
     res = cx2_kernel(n, ni, nj, nk, llx, lly, llz);
 

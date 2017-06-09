@@ -400,7 +400,6 @@ SEXP score_delta_monolithic(SEXP arc, SEXP network, SEXP data, SEXP score,
     case BDS:
     case BDJ:
     case MBDE:
-    case BDLA:
     case BGE:
 
       switch(gprior_label(CHAR(STRING_ELT(getListElement(extra, "prior"), 0)))) {

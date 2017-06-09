@@ -17,7 +17,7 @@ static double mc_cvjt(int **nrowt, int **ncolt, int *ncond, int nr, int nc,
 
 /* unconditional Monte Carlo and semiparametric discrete tests. */
 void c_mcarlo(int *xx, int nr, int *yy, int nc, int num, int B,
-    double *observed, double *pvalue, double alpha, test_e test, double *df) {
+    double *observed, double *pvalue, double alpha, test_e test, double *df, SEXP weights) {
 
 double *fact = NULL;
 int **n = NULL, *ncolt = NULL, *nrowt = NULL, *workspace = NULL;
@@ -28,7 +28,7 @@ int k = 0, enough = ceil(alpha * B) + 1, constx = TRUE, consty = TRUE;
   /* allocate and initialize the workspace for rcont2. */
   workspace = Calloc1D(nc, sizeof(int));
   /* initialize the contingency table and the marginal frequencies. */
-  fill_2d_table(xx, yy, &n, &nrowt, &ncolt, nr, nc, num);
+  fill_2d_table(xx, yy, &n, &nrowt, &ncolt, nr, nc, num, weights); 
 
   /* if at least one of the two variables is constant, they are independent. */
   for (k = 0; k < nr; k++)
@@ -188,7 +188,8 @@ int j = 0, k = 0, enough = ceil(alpha * B) + 1, constx = TRUE, consty = TRUE;
   /* allocate and initialize the workspace for rcont2. */
   workspace = Calloc1D(nc, sizeof(int));
   /* initialize the contingency table and the marginal frequencies. */
-  fill_3d_table(xx, yy, zz, &n, &nrowt, &ncolt, &ncond, nr, nc, nl, num);
+  SEXP weights;
+  fill_3d_table(xx, yy, zz, &n, &nrowt, &ncolt, &ncond, nr, nc, nl, num, weights); /*DUMMY */
 
   /* if at least one of the two variables is constant, they are independent. */
   for (k = 0; k < nl; k++)

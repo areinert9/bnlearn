@@ -15,7 +15,7 @@ resampling.tests = c("mc-mi", "smc-mi", "mc-x2", "smc-x2", "mc-mi-g", "smc-mi-g"
 asymptotic.tests = c("mi", "mi-adf", "mi-g", "x2", "x2-adf", "zf", "jt", "mi-sh",
   "mi-g-sh")
 
-available.discrete.bayesian.scores = c("bde", "bds", "bdj", "k2", "mbde", "bdla")
+available.discrete.bayesian.scores = c("bde", "bds", "bdj", "k2", "mbde")
 available.discrete.scores = 
   c("loglik", "aic", "bic", available.discrete.bayesian.scores)
 available.continuous.bayesian.scores = c("bge")
@@ -61,7 +61,11 @@ method.labels = c(
 
 method.extra.args = list(
   'hc' = c("max.iter", "maxp", "restart", "perturb"),
-  'tabu' = c("max.iter", "maxp", "tabu", "max.tabu")
+  'tabu' = c("max.iter", "maxp", "tabu", "max.tabu", "weights"),
+  'gs' = c("weights"),
+  'iamb' = c("weights"),
+  'fast.iamb' = c("weights"),
+  'inter.iamb' = c("weights")
 )
 
 test.labels = c(
@@ -98,7 +102,6 @@ score.labels = c(
   'bds' = "Bayesian Dirichlet Sparse (BDs)",
   'bdj' = "Bayesian Dirichlet, Jeffrey's prior",
   'mbde' = "Bayesian Dirichlet (interventional data)",
-  'bdla' = "Bayesian Dirichlet, Locally Averaged",
   'aic' = "AIC (disc.)",
   'bic' = "BIC (disc.)",
   'loglik' = "Log-Likelihood (disc.)",
@@ -112,16 +115,15 @@ score.labels = c(
 )
 
 score.extra.args = list(
-  "k2" = character(0),
-  "bde" = c("prior", "beta", "iss"),
-  "bds" = c("prior", "beta", "iss"),
-  "bdj" = c("prior", "beta"),
-  "mbde" = c("prior", "beta", "iss", "exp"),
-  "bdla" = c("prior", "beta", "l"),
-  "aic" = c("k"),
-  "bic" = c("k"),
+  "k2" = c( "weights"),
+  "bde" = c("prior", "beta", "iss", "weights"),
+  "bds" = c("prior", "beta", "iss", "weights"),
+  "bdj" = c("prior", "beta", "weights"),
+  "mbde" = c("prior", "beta", "iss", "exp", "weights"),
+  "aic" = c("k", "weights"),
+  "bic" = c("k", "weights"),
   "bge" = c("prior", "beta", "iss", "phi"),
-  "loglik" = character(0),
+  "loglik" = c( "weights"),
   "loglik-g" = character(0),
   "aic-g" = c("k"),
   "bic-g" = c("k"),
@@ -222,8 +224,8 @@ fitting.labels = c(
 )
 
 fitting.extra.args = list(
-  "mle" = character(0),
-  "bayes" = "iss"
+  "mle" = "weights",
+  "bayes" = c("iss", "weights")
 )
 
 available.cv.methods = c("k-fold", "hold-out", "custom-folds")

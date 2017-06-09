@@ -63,6 +63,9 @@ int **columns = NULL, *levels = NULL, **n = NULL, *nrowt = NULL, *ncolt = NULL;
 int *debuglevel = LOGICAL(debug), *node_data = NULL;
 long double num = 0, den = 0, ratio = 0;
 SEXP nodes, labels, cur, node_info, parents, par_data, temp, cfg;
+SEXP *weights;
+
+
 
   /* dereference the columns of the data frame. */
   columns = Calloc1D(nnodes, sizeof(int *));
@@ -95,7 +98,7 @@ SEXP nodes, labels, cur, node_info, parents, par_data, temp, cfg;
 
     if (length(parents) == 0) {
 
-      fill_1d_table(node_data, &ncolt, levels[i], nobs);
+      fill_1d_table(node_data, &ncolt, levels[i], nobs, weights);
 
       /* add the effective degrees of freedom to the numerator. */
       num += deff_node_root(ncolt, levels[i]);
@@ -112,7 +115,7 @@ SEXP nodes, labels, cur, node_info, parents, par_data, temp, cfg;
       PROTECT(cfg = c_configurations(par_data, TRUE, TRUE));
 
       fill_2d_table(node_data, INTEGER(cfg), &n, &nrowt, &ncolt, levels[i],
-        NLEVELS(cfg), nobs);
+        NLEVELS(cfg), nobs, weights); /* DUMMY */
 
       /* add the effective degrees of freedom to the numerator. */
       num += deff_node(n, ncolt, levels[i], NLEVELS(cfg));

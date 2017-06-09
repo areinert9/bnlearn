@@ -277,12 +277,15 @@ SEXP dimnames;
 }/*SETDIMNAMES*/
 
 /* minimal implementation of table(). */
-SEXP minimal_table(SEXP dataframe) {
+SEXP minimal_table(SEXP dataframe, SEXP weights) {
 
 int i = 0, nrow = length(VECTOR_ELT(dataframe, 0)), ncol = length(dataframe);
 int *dd = NULL, *tt = NULL, **columns = NULL, *cfg = NULL;
 double ncells = 1;
 SEXP table, dims, dimnames, cur;
+
+/* getting weights to something c knows */
+
 
   /* prepare the dimensions. */
   PROTECT(dims = allocVector(INTSXP, ncol));
@@ -322,13 +325,15 @@ SEXP table, dims, dimnames, cur;
   PROTECT(table = allocVector(INTSXP, ncells));
   tt = INTEGER(table);
   memset(tt, '\0', ncells * sizeof(int));
+  
 
   /* prepare the configurations. */
   cfg = Calloc1D(nrow, sizeof(int));
   c_fast_config(columns, nrow, ncol, dd, cfg, NULL, 0);
 
   for (i = 0; i < nrow; i++)
-    tt[cfg[i]]++;
+
+    tt[cfg[i]] = tt[cfg[i]] + INTEGER(weights)[i];
 
   /* set the attributess for class and dimensions. */
   setAttrib(table, R_ClassSymbol, mkString("table"));

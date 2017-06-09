@@ -1,7 +1,7 @@
 
 # second prinple of CI algorithms: infer arc orientation from graph structure.
 second.principle = function(x, cluster = NULL, mb, whitelist, blacklist,
-    test, alpha, B = NULL, data, strict, debug = FALSE) {
+    test, alpha, B = NULL, data, strict, debug = FALSE, weights) {
 
   nodes = names(x)
 
@@ -17,7 +17,7 @@ second.principle = function(x, cluster = NULL, mb, whitelist, blacklist,
   # 3.1 detect v-structures.
   vs = do.call("rbind",
          vstruct.detect(nodes = nodes, arcs = arcs, mb = mb, data = x,
-           alpha = alpha, B = B, test = test, debug = debug))
+           alpha = alpha, B = B, test = test, debug = debug, weights = weights))
   rownames(vs) = NULL
 
   if (!is.null(vs)) {
@@ -36,7 +36,7 @@ second.principle = function(x, cluster = NULL, mb, whitelist, blacklist,
 
   # save the status of the learning algorithm.
   learning = list(whitelist = whitelist, blacklist = blacklist,
-    test = test, args = list(alpha = alpha), ntests = test.counter())
+    test = test, args = list(alpha = alpha), ntests = test.counter(), weights = weights)
 
   # include also the number of permutations/bootstrap samples
   # if it makes sense.
@@ -61,7 +61,7 @@ fake.markov.blanket = function(learn, target) {
 
 # build the neighbourhood of a node from the markov blanket.
 neighbour = function(x, mb, data, alpha, B = NULL, whitelist, blacklist,
-  backtracking = NULL, test, empty.dsep = TRUE, markov = TRUE, debug = FALSE) {
+  backtracking = NULL, test, empty.dsep = TRUE, markov = TRUE, debug = FALSE, weights) {
 
   # save a pristine copy of the markov blanket.
   nbrhood = mb[[x]]
@@ -129,7 +129,7 @@ neighbour = function(x, mb, data, alpha, B = NULL, whitelist, blacklist,
     return(list(mb = mb[[x]], nbr = nbrhood))
 
   # define the backward selection heuristic.
-  nbr = function(y, x, mb, test) {
+  nbr = function(y, x, mb, test, weights) {
 
     if (debug)
       cat("  * checking node", y, "for neighbourhood.\n")
@@ -144,7 +144,7 @@ neighbour = function(x, mb, data, alpha, B = NULL, whitelist, blacklist,
       cat("    > dsep.set = '", dsep.set, "'\n")
 
     a = allsubs.test(x = x, y = y, sx = dsep.set, min = ifelse(empty.dsep, 0, 1),
-          data = data, test = test, alpha = alpha, B = B, debug = debug)[1]
+          data = data, test = test, alpha = alpha, B = B, debug = debug, weights = weights)[1]
 
     if (a > alpha) {
 
@@ -167,7 +167,7 @@ neighbour = function(x, mb, data, alpha, B = NULL, whitelist, blacklist,
 
   # do not even try to remove whitelisted nodes; on the other hand, known.good
   # nodes from backtracking should be checked to remove false positives.
-  sapply(nbrhood[nbrhood %!in% whitelisted], nbr, x = x, mb = mb, test = test)
+  sapply(nbrhood[nbrhood %!in% whitelisted], nbr, x = x, mb = mb, test = test, weights = weights)
 
   return(list(mb = mb[[x]], nbr = nbrhood))
 
@@ -175,7 +175,7 @@ neighbour = function(x, mb, data, alpha, B = NULL, whitelist, blacklist,
 
 # detect v-structures in the graph.
 vstruct.detect = function(nodes, arcs, mb, data, alpha, B = NULL, test,
-    debug = FALSE) {
+    debug = FALSE, weights) {
 
   vstruct.centered.on = function(x, mb, data) {
 
@@ -217,7 +217,7 @@ vstruct.detect = function(nodes, arcs, mb, data, alpha, B = NULL, test,
         cat("    > chosen d-separating set: '", dsep.set, "'\n")
 
       assoc = allsubs.test(x = y, y = z, fixed = x, sx = dsep.set, data = data,
-                test = test, B = B, alpha = alpha, debug = debug)
+                test = test, B = B, alpha = alpha, debug = debug, weights = weights)
       a = assoc[1]
       max_a = assoc[3]
 

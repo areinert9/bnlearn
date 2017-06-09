@@ -54,10 +54,10 @@ arcs.rbind = function(matrix1, matrix2, reverse2 = FALSE) {
 
 }#ARCS.RBIND
 
-minimal.table = function(x) {
-
+minimal.table = function(x, w) {
+  
   .Call(call_minimal_table,
-        x = x);
+       x, w)
 
 }#MINIMAL.TABLE
 

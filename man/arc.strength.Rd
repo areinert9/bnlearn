@@ -31,7 +31,7 @@ averaged.network(strength, nodes, threshold)
     class \code{bn} (for all other functions).}
   \item{networks}{a list, containing either object of class \code{bn} or arc
     sets (matrices or data frames with two columns, optionally labeled "from"
-    and "to"); or an object of class \code{bn.kcv} or \code{bn.kcv.list}.}
+    and "to").}
   \item{data}{a data frame containing the data the Bayesian network was
     learned from.}
   \item{cluster}{an optional cluster object from package \pkg{parallel}.}
